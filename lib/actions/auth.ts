@@ -2,12 +2,17 @@
 
 import { request } from "../utils";
 
-export function signIn({ email, password }: { email: string, password: string }) {
-    return request("/auth/signin", {
-        method: "POST",
-        body: JSON.stringify({
-            email,
-            password,
-        }),
-    });
+export async function signIn({ email, password }: { email: string, password: string }) {
+    try {
+        const data = request("/auth/signin", {
+            method: "POST",
+            body: JSON.stringify({
+                email,
+                password,
+            }),
+        });
+        return data;
+    } catch (error) {
+        throw error
+    }
 }
