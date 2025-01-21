@@ -6,7 +6,9 @@ export function cn(...inputs: ClassValue[]) {
 }
 export async function request<T>(path = '/', init?: RequestInit): Promise<T | null> {
   try {
-    const res = await fetch(`${process.env.NEXT_ADMIN_BASE_URL}${path}`, {
+    const url = new URL(`api/v1/${path}`, process.env.NEXT_ADMIN_BASE_URL)
+    console.log(url, "URL")
+    const res = await fetch(url, {
       headers: {
         "Content-Type": "application/json",
       },
