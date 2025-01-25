@@ -1,17 +1,15 @@
-import { DashboardShell } from "@/components/dashboard-shell"
-import { DashboardHeader } from "@/components/dashboard-header"
 import { VendorsList } from "@/components/vendors/vendors-list"
 import { VendorsHeader } from "@/components/vendors/vendor-header"
+import { getLoggedInUser } from "@/lib/actions/user"
 
-export default function VendorsPage() {
+export default async function VendorsPage() {
+  const res = await getLoggedInUser()
+  await new Promise((resolve) => setTimeout(resolve, 1000))
   return (
-    <DashboardShell>
-      <div className="flex flex-col gap-6 w-full pt-0">
-        <DashboardHeader />
-        <VendorsHeader />
-        <VendorsList />
-      </div>
-    </DashboardShell>
+    <div className="flex flex-col gap-6 w-full pt-0">
+      <VendorsHeader />
+      <VendorsList />
+    </div>
   )
 }
 
