@@ -8,8 +8,9 @@ import { Store } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Label } from "@/components/ui/label"
 import React, { useTransition } from 'react'
+import { request } from '@/lib/utils'
 
-const SingnInForm = () => {
+export const SignInForm = () => {
     const [isPending, startTransition] = useTransition()
     const { toast } = useToast()
     const router = useRouter()
@@ -24,12 +25,11 @@ const SingnInForm = () => {
                     email: formData.get("email") as string,
                     password: formData.get("password") as string,
                 })
-
-                if (!result) {
+                if (!result.success) {
                     toast({
                         variant: "destructive",
                         title: "Error",
-                        // description: result.error,
+                        description: result.message || "An unexpected error occurred. Please try again.",
                     })
                     return
                 }
@@ -42,11 +42,26 @@ const SingnInForm = () => {
                 router.push("/")
                 router.refresh()
             } catch (error) {
-                console.log(error)
                 toast({
                     variant: "destructive",
                     title: "Error",
                     description: "An unexpected error occurred. Please try again.",
+                })
+            }
+        })
+    }
+    async function handleGoogleSignIn() {
+        startTransition(async () => {
+            try {
+                await new Promise(r => r(setTimeout(() => { }, 4000)))
+                const res = await request('/auth/google?callback=http://localhost')
+                if (res.success) {
+                    return router.push(res.redirect?.path!)
+                }
+                throw new Error("Google Sign In Error")
+            } catch (error) {
+                toast({
+                    title: "Google Sign In Error"
                 })
             }
         })
@@ -92,6 +107,38 @@ const SingnInForm = () => {
                         <Button type="submit" className="w-full" size="lg" isLoading={isPending} loadingText="Signing in...">
                             Sign In
                         </Button>
+                        <hr />
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className="w-full"
+                            size="lg"
+                            onClick={handleGoogleSignIn}
+                            disabled={isPending}
+                        >
+                            {isPending ? (
+                                "Signing in..."
+                            ) : (
+                                <>
+                                    <svg
+                                        className="mr-2 h-4 w-4"
+                                        aria-hidden="true"
+                                        focusable="false"
+                                        data-prefix="fab"
+                                        data-icon="google"
+                                        role="img"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 488 512"
+                                    >
+                                        <path
+                                            fill="currentColor"
+                                            d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"
+                                        ></path>
+                                    </svg>
+                                    Continue with Google
+                                </>
+                            )}
+                        </Button>
                     </CardContent>
                 </form>
                 <CardFooter className="flex flex-col gap-4 text-center text-sm text-muted-foreground">
@@ -101,5 +148,3 @@ const SingnInForm = () => {
         </div>
     )
 }
-
-export default SingnInForm
