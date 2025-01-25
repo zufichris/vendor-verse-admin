@@ -1,3 +1,4 @@
+'use client'
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
 import {
@@ -10,9 +11,15 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Bell, User, Settings, LogOut, ChevronDown, Clock, Calendar } from "lucide-react"
 import { Card } from "@/components/ui/card"
-
-export function DashboardHeader() {
-  // Get current time and date
+import { logout } from "@/lib/actions/auth"
+import { useRouter } from "next/navigation"
+import { TUser } from "@/lib/types/user"
+import { UserAvatar } from "./user-avatar"
+interface DashboardHeaderprops {
+  user: TUser
+}
+export function DashboardHeader({ user }: DashboardHeaderprops) {
+  const router = useRouter()
   const now = new Date()
   const timeString = now.toLocaleTimeString("en-US", {
     hour: "numeric",
@@ -26,7 +33,7 @@ export function DashboardHeader() {
   })
 
   return (
-    <Card className="sticky top-0 z-50 border-none shadow-none bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <Card className="sticky top-0 z-50 border-none shadow-none bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 mb-3">
       <div className="flex flex-col gap-8 sm:flex-row sm:items-center sm:justify-between rounded-lg p-2">
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-muted-foreground">
@@ -37,7 +44,7 @@ export function DashboardHeader() {
             <span className="text-sm font-medium">{dateString}</span>
           </div>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight md:text-4xl">Welcome back, John!</h1>
+            <h1 className="text-3xl font-bold tracking-tight md:text-4xl">Welcome back, <span className="capitalize">{user.firstName}</span>!</h1>
             <p className="text-lg text-muted-foreground mt-1">Here's what's happening with your store today</p>
           </div>
         </div>
@@ -77,25 +84,21 @@ export function DashboardHeader() {
           </DropdownMenu>
           <ThemeToggle />
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+            <DropdownMenuTrigger asChild className="py-1">
               <Button variant="outline" className="h-10 w-fit gap-2 px-3">
-                <img
-                  src="/placeholder.svg?height=32&width=32"
-                  alt="Profile"
-                  className="rounded-full"
-                  width={32}
-                  height={32}
-                />
+                <UserAvatar src={user.profilePictureUrl ? user.profilePictureUrl.url : ""} firstName={user.firstName || ""} lastName={user.lastName || ""} />
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium hidden md:inline-block">John Doe</span>
+                  <span className="text-sm font-medium hidden md:inline-block">
+                    <div className="capitalize"><span>{user.firstName}</span> <span>{user.lastName}</span></div>
+                  </span>
                   <ChevronDown className="h-4 w-4 text-muted-foreground" />
                 </div>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-60">
               <DropdownMenuLabel className="flex flex-col space-y-1">
-                <span>John Doe</span>
-                <span className="text-xs font-normal text-muted-foreground">john.doe@example.com</span>
+                <div className="capitalize"><span>{user.firstName}</span> <span>{user.lastName}</span></div>
+                <span className="text-xs font-normal text-muted-foreground">{user.email}</span>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="flex items-center gap-2 py-2">
@@ -109,7 +112,10 @@ export function DashboardHeader() {
                 <span className="ml-auto text-xs text-muted-foreground">⌘S</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="flex items-center gap-2 py-2 text-red-600">
+              <DropdownMenuItem onClick={async () => {
+                await logout()
+                router.push("/signin")
+              }} className="flex items-center gap-2 py-2 text-red-600">
                 <LogOut className="h-4 w-4" />
                 <span>Logout</span>
                 <span className="ml-auto text-xs text-muted-foreground">⌘Q</span>

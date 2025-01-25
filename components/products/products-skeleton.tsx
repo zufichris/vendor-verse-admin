@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 export function ProductsTableSkeleton() {
   return (
     <Card>
-      <div className="relative w-full overflow-auto">
+      <div className="relative w-full overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
@@ -35,19 +35,19 @@ export function ProductsTableSkeleton() {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Skeleton className="h-4 w-[120px]" />
-                </TableCell>
-                <TableCell>
                   <Skeleton className="h-4 w-[80px]" />
                 </TableCell>
                 <TableCell>
                   <Skeleton className="h-4 w-[60px]" />
                 </TableCell>
                 <TableCell>
-                  <Skeleton className="h-6 w-[100px] rounded-full" />
+                  <Skeleton className="h-4 w-[15px]" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-6 w-[60px] rounded-full" />
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
-                  <Skeleton className="h-4 w-[150px]" />
+                  <Skeleton className="h-4 w-[80px]" />
                 </TableCell>
                 <TableCell className="text-right">
                   <Skeleton className="h-8 w-8 rounded-md ml-auto" />

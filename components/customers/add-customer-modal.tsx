@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useTransition } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -15,14 +15,35 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Plus } from "lucide-react"
 import { FormSubmitButton } from "@/components/forms/form-submit-button"
+import { createNewUser } from "@/lib/actions/user"
+import { useToast } from "@/hooks/use-toast"
 
 export function AddCustomerModal() {
+  const { toast } = useToast()
   const [open, setOpen] = useState(false)
-
   async function onSubmit(formData: FormData) {
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    setOpen(false)
+    try {
+      const data = {
+        email: formData.get("email")?.toString()!,
+        password: formData.get("password")?.toString()!,
+        firstName: formData.get("firstName")?.toString()!,
+        lastName: formData.get("lastName")?.toString()!,
+        phoneNumber: formData.get("phoneNumber")?.toString()!,
+      }
+      const res = await createNewUser(data)
+      if (!res.success) {
+        throw new Error("Error Creating User")
+      }
+      setOpen(false)
+      toast({
+        title: "User Created Successful"
+      })
+    } catch (error) {
+      toast({
+        title: "Error Creating User",
+        variant: "destructive"
+      })
+    }
   }
 
   return (
@@ -43,10 +64,16 @@ export function AddCustomerModal() {
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right">
-                Name
+              <Label htmlFor="firstName" className="text-right">
+                First Name
               </Label>
-              <Input id="name" name="name" placeholder="Customer name" className="col-span-3" required />
+              <Input id="firstName" name="firstName" placeholder="Customer First Name" className="col-span-3" required />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="lastName" className="text-right">
+                Last Name
+              </Label>
+              <Input id="lastName" name="lastName" placeholder="Customer LastName" className="col-span-3" required />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="email" className="text-right">
@@ -62,10 +89,16 @@ export function AddCustomerModal() {
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="phone" className="text-right">
+              <Label htmlFor="phoneNumber" className="text-right">
                 Phone
               </Label>
-              <Input id="phone" name="phone" type="tel" placeholder="+1 234 567 890" className="col-span-3" />
+              <Input id="phoneNumber" name="phoneNumber" type="tel" placeholder="+1 234 567 890" className="col-span-3" />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="phone" className="text-right">
+                Password
+              </Label>
+              <Input id="password" name="password" type="password" placeholder="Password" className="col-span-3" />
             </div>
           </div>
           <DialogFooter>

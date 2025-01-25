@@ -6,14 +6,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { AddCustomerModal } from "./add-customer-modal"
 
 export function CustomersHeader() {
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false)
-    }, 2000)
-    return () => clearTimeout(timer)
-  }, [])
 
   if (isLoading) {
     return (

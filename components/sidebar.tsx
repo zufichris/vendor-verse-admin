@@ -1,12 +1,15 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { BarChart3, Package, Settings, ShoppingCart, Store, Users, LayoutDashboard, ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { TUser } from "@/lib/types/user"
+import { logout } from "@/lib/actions/auth"
+import { UserAvatar } from "./user-avatar"
 
 const sidebarItems = [
   {
@@ -47,12 +50,13 @@ const sidebarItems = [
 ]
 
 interface SidebarProps {
-  className?: string
+  className?: string,
+  user: TUser
 }
 
-export function Sidebar({ className }: SidebarProps) {
+export function Sidebar({ className, user }: SidebarProps) {
   const pathname = usePathname()
-
+  const router = useRouter()
   return (
     <div className={cn("border-r bg-background/60 backdrop-blur-xl w-[280px]", className)}>
       <div className="flex h-full max-h-screen flex-col gap-2">
@@ -120,21 +124,15 @@ export function Sidebar({ className }: SidebarProps) {
             </div>
           </div>
         </ScrollArea>
-        <div className="border-t p-4">
+        {user ? <div className="border-t p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="h-8 w-8 rounded-full bg-primary/10">
-                <img
-                  src="/placeholder.svg?height=32&width=32"
-                  alt="Profile"
-                  className="rounded-full"
-                  width={32}
-                  height={32}
-                />
+                <UserAvatar src={user.profilePictureUrl ? user.profilePictureUrl.url : ""} firstName={user.firstName || ""} lastName={user.lastName || ""} />
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-medium leading-none">John Doe</p>
-                <p className="text-xs text-muted-foreground">Admin</p>
+              <div><span className="capitalize">{user.firstName}</span> <span className="capitalize">{user.lastName}</span></div>
+                <p className="text-xs text-muted-foreground capitalize">{user?.roles![0] ?? "User"}</p>
               </div>
             </div>
             <DropdownMenu>
@@ -146,11 +144,14 @@ export function Sidebar({ className }: SidebarProps) {
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem>View Profile</DropdownMenuItem>
                 <DropdownMenuItem>Settings</DropdownMenuItem>
-                <DropdownMenuItem className="text-red-600">Logout</DropdownMenuItem>
+                <DropdownMenuItem onClick={async () => {
+                  await logout()
+                  router.push("/signin")
+                }} className="text-red-600">Logout</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-        </div>
+        </div> : null}
       </div>
     </div>
   )
