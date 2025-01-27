@@ -93,7 +93,7 @@ export function Sidebar({ className, user }: SidebarProps) {
                   <Button
                     key={item.href}
                     asChild
-                    variant={pathname === item.href ? "secondary" : "ghost"}
+                    variant={pathname.includes(item.href) ? "secondary" : "ghost"}
                     className="w-full justify-start"
                   >
                     <Link href={item.href}>
@@ -111,7 +111,7 @@ export function Sidebar({ className, user }: SidebarProps) {
                   <Button
                     key={item.href}
                     asChild
-                    variant={pathname === item.href ? "secondary" : "ghost"}
+                    variant={pathname.includes(item.href) ? "secondary" : "ghost"}
                     className="w-full justify-start"
                   >
                     <Link href={item.href}>
@@ -131,7 +131,7 @@ export function Sidebar({ className, user }: SidebarProps) {
                 <UserAvatar src={user.profilePictureUrl ? user.profilePictureUrl.url : ""} firstName={user.firstName || ""} lastName={user.lastName || ""} />
               </div>
               <div className="space-y-1">
-              <div><span className="capitalize">{user.firstName}</span> <span className="capitalize">{user.lastName}</span></div>
+                <div><span className="capitalize">{user.firstName}</span> <span className="capitalize">{user.lastName}</span></div>
                 <p className="text-xs text-muted-foreground capitalize">{user?.roles![0] ?? "User"}</p>
               </div>
             </div>

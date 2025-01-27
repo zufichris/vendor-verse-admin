@@ -15,10 +15,10 @@ import { logout } from "@/lib/actions/auth"
 import { useRouter } from "next/navigation"
 import { TUser } from "@/lib/types/user"
 import { UserAvatar } from "./user-avatar"
-interface DashboardHeaderprops {
-  user: TUser
+interface DashboardHeaderProps {
+  readonly user: TUser
 }
-export function DashboardHeader({ user }: DashboardHeaderprops) {
+export function DashboardHeader({ user }: DashboardHeaderProps) {
   const router = useRouter()
   const now = new Date()
   const timeString = now.toLocaleTimeString("en-US", {
@@ -33,7 +33,7 @@ export function DashboardHeader({ user }: DashboardHeaderprops) {
   })
 
   return (
-    <Card className="sticky top-0 z-50 border-none shadow-none bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 mb-3">
+    <Card className="sticky top-0 z-50 border-none shadow-none bg-background/100 backdrop-blur supports-[backdrop-filter]:bg-background/60 mb-3">
       <div className="flex flex-col gap-8 sm:flex-row sm:items-center sm:justify-between rounded-lg p-2">
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-muted-foreground">
@@ -44,7 +44,7 @@ export function DashboardHeader({ user }: DashboardHeaderprops) {
             <span className="text-sm font-medium">{dateString}</span>
           </div>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight md:text-4xl">Welcome back, <span className="capitalize">{user.firstName}</span>!</h1>
+            <h1 className="text-xl font-thin tracking-tight md:text-4xl">Welcome back, <span className="capitalize">{user.firstName}</span>!</h1>
             <p className="text-lg text-muted-foreground mt-1">Here's what's happening with your store today</p>
           </div>
         </div>
@@ -68,8 +68,7 @@ export function DashboardHeader({ user }: DashboardHeaderprops) {
               <div className="max-h-80 overflow-y-auto">
                 <DropdownMenuItem className="flex flex-col items-start gap-1 p-4">
                   <div className="flex items-center gap-2 font-medium">
-                    New Order Received
-                    <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">New</span>
+                    New Order Received<span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">New</span>
                   </div>
                   <span className="text-sm text-muted-foreground">Order #1234 from John Doe</span>
                   <span className="text-xs text-muted-foreground">2 minutes ago</span>
@@ -86,7 +85,7 @@ export function DashboardHeader({ user }: DashboardHeaderprops) {
           <DropdownMenu>
             <DropdownMenuTrigger asChild className="py-1">
               <Button variant="outline" className="h-10 w-fit gap-2 px-3">
-                <UserAvatar src={user.profilePictureUrl ? user.profilePictureUrl.url : ""} firstName={user.firstName || ""} lastName={user.lastName || ""} />
+                <UserAvatar src={user.profilePictureUrl ? user.profilePictureUrl.url : ""} firstName={user.firstName ??""} lastName={user.lastName??""} />
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium hidden md:inline-block">
                     <div className="capitalize"><span>{user.firstName}</span> <span>{user.lastName}</span></div>
