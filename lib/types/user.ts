@@ -4,7 +4,7 @@ export const OAuthSchema = z.object({
     provider: z.string().nullable().optional(),
     oauthId: z.string(),
 })
-export const UserSchema = z.object({
+export const BasicUserSchema = z.object({
     id: z.string().optional(),
     custId: z.string().optional(),
     email: z.string().email(),
@@ -31,4 +31,39 @@ export const UserSchema = z.object({
 });
 
 
-export type TUser = z.infer<typeof UserSchema>;
+
+
+
+export const AddressSchema = z.object({
+    street: z.string().nullable().optional(),
+    city: z.string().nullable().optional(),
+    state: z.string().nullable().optional(),
+    country: z.string().nullable().optional(),
+    postalCode: z.string().nullable().optional(),
+})
+
+export const BillingSchema = z.object({
+    plan: z.string().nullable().optional(),
+    status: z.string().nullable().optional(),
+    lastPayment: z.date().nullable().optional(),
+    paymentMethod: z.string().nullable().optional(),
+})
+
+export const UserSchema = BasicUserSchema.extend({
+    dateOfBirth: z.date().nullable().optional(),
+    gender: z.string().nullable().optional(),
+    company: z.string().nullable().optional(),
+    jobTitle: z.string().nullable().optional(),
+    preferredLanguage: z.string().nullable().optional(),
+    communicationPreferences: z.array(z.string()).nullable().optional(),
+    address: AddressSchema.nullable().optional(),
+    billing: BillingSchema.nullable().optional(),
+    lastLoginAt: z.date().nullable().optional(),
+    totalOrders: z.number().nullable().optional(),
+    lifetimeValue: z.number().nullable().optional(),
+    tags: z.array(z.string()).nullable().optional(),
+    notes: z.string().nullable().optional(),
+})
+
+export type TUser = z.infer<typeof UserSchema>
+
