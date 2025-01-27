@@ -3,12 +3,12 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface PaginationProps {
-  currentPage: number
-  totalPages: number
-  onPageChange: (page: number) => void
-  pageSize: number
-  onPageSizeChange: (size: number) => void
-  totalItems: number
+  readonly currentPage: number
+  readonly totalPages: number
+  readonly onPageChange: (page: number) => void
+  readonly pageSize: number
+  readonly onPageSizeChange: (size: number) => void
+  readonly totalItems: number
 }
 
 export function Pagination({
