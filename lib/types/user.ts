@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ECurrency, ELanguageCode } from "./enum";
 
 export const OAuthSchema = z.object({
     provider: z.string().nullable().optional(),
@@ -49,13 +50,47 @@ export const BillingSchema = z.object({
     paymentMethod: z.string().nullable().optional(),
 })
 
+const PreferencesSchema = z.object({
+    language: z.nativeEnum(ELanguageCode.Enum).default(ELanguageCode.enum.en),
+    currency: z.nativeEnum(ECurrency.Enum).default(ECurrency.enum.USD),
+    notificationPreferences: z.object({
+        email: z.boolean().default(true),
+        sms: z.boolean().default(false),
+        push: z.boolean().default(true),
+    }),
+});
+
+export const UserStatsSchema = z.object({
+    totalOrders: z.number().default(0),
+    totalSpent: z.number().default(0),
+    averageOrderValue: z.number().default(0),
+    favoriteVendors: z.array(
+        z.object({
+            vendorName: z.string(),
+            vendorId: z.string(),
+        })
+    ).default([]),
+    recentlyViewedProducts: z.array(
+        z.object({
+            productId: z.string(),
+            viewedAt: z.date().default(new Date()),
+        })
+    ).default([]),
+    ordersHistory: z.array(
+        z.object({
+            orderId: z.string(),
+            totalAmount: z.number(),
+            orderDate: z.date(),
+        })
+    ).default([]),
+});
+
+
 export const UserSchema = BasicUserSchema.extend({
     dateOfBirth: z.date().nullable().optional(),
     gender: z.string().nullable().optional(),
     company: z.string().nullable().optional(),
     jobTitle: z.string().nullable().optional(),
-    preferredLanguage: z.string().nullable().optional(),
-    communicationPreferences: z.array(z.string()).nullable().optional(),
     address: AddressSchema.nullable().optional(),
     billing: BillingSchema.nullable().optional(),
     lastLoginAt: z.date().nullable().optional(),
@@ -63,7 +98,26 @@ export const UserSchema = BasicUserSchema.extend({
     lifetimeValue: z.number().nullable().optional(),
     tags: z.array(z.string()).nullable().optional(),
     notes: z.string().nullable().optional(),
+    preferences: PreferencesSchema.optional().default({
+        language: ELanguageCode.enum.en,
+        currency: ECurrency.enum.USD,
+        notificationPreferences: {
+            email: true,
+            sms: false,
+            push: true,
+        },
+    }),
+    stats: UserStatsSchema.optional().default({
+        averageOrderValue: 0,
+        favoriteVendors: [],
+        ordersHistory: [],
+        recentlyViewedProducts: [],
+        totalOrders: 0,
+        totalSpent: 0
+    })
 })
 
-export type TUser = z.infer<typeof UserSchema>
 
+export type TUser = z.infer<typeof UserSchema>;
+export type TUserStats = z.infer<typeof UserStatsSchema>;
+export type TUserPreferences = z.infer<typeof PreferencesSchema>
