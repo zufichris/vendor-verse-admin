@@ -1,6 +1,5 @@
 "use client"
 
-// Inspired by react-hot-toast library
 import * as React from "react"
 
 import type {
@@ -36,21 +35,21 @@ type ActionType = typeof actionTypes
 
 type Action =
   | {
-      type: ActionType["ADD_TOAST"]
-      toast: ToasterToast
-    }
+    type: ActionType["ADD_TOAST"]
+    toast: ToasterToast
+  }
   | {
-      type: ActionType["UPDATE_TOAST"]
-      toast: Partial<ToasterToast>
-    }
+    type: ActionType["UPDATE_TOAST"]
+    toast: Partial<ToasterToast>
+  }
   | {
-      type: ActionType["DISMISS_TOAST"]
-      toastId?: ToasterToast["id"]
-    }
+    type: ActionType["DISMISS_TOAST"]
+    toastId?: ToasterToast["id"]
+  }
   | {
-      type: ActionType["REMOVE_TOAST"]
-      toastId?: ToasterToast["id"]
-    }
+    type: ActionType["REMOVE_TOAST"]
+    toastId?: ToasterToast["id"]
+  }
 
 interface State {
   toasts: ToasterToast[]
@@ -108,9 +107,9 @@ export const reducer = (state: State, action: Action): State => {
         toasts: state.toasts.map((t) =>
           t.id === toastId || toastId === undefined
             ? {
-                ...t,
-                open: false,
-              }
+              ...t,
+              open: false,
+            }
             : t
         ),
       }
@@ -140,28 +139,34 @@ function dispatch(action: Action) {
   })
 }
 
-type Toast = Omit<ToasterToast, "id">
+type Toast = Partial<Omit<ToasterToast, "id" | "title">> & {
+  message: string,
+  status: number,
+  success: boolean,
+  description?: string
+}
 
-function toast({ ...props }: Toast) {
+function toast({ description, message, status, success, ...props }: any) {
   const id = genId()
-
+  const desc = description ?? (success ? `Completed Successfully ${status}` : `An Unexpected Error Occurred ${status}`)
   const update = (props: ToasterToast) =>
     dispatch({
       type: "UPDATE_TOAST",
-      toast: { ...props, id },
+      toast: { title: message, description: desc, variant: success ? "default" : "destructive", ...props, id },
     })
-  const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id })
+  const dismiss: () => void = () => dispatch({ type: "DISMISS_TOAST", toastId: id })
+
 
   dispatch({
     type: "ADD_TOAST",
     toast: {
-      ...props,
+      title: message, description: desc, variant: success ? "default" : "destructive", ...props,
       id,
       open: true,
       onOpenChange: (open) => {
         if (!open) dismiss()
-      },
-    },
+      }
+    }
   })
 
   return {
