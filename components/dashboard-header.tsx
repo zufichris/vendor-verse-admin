@@ -85,7 +85,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
           <DropdownMenu>
             <DropdownMenuTrigger asChild className="py-1">
               <Button variant="outline" className="h-10 w-fit gap-2 px-3">
-                <UserAvatar src={user.profilePictureUrl ? user.profilePictureUrl.url : ""} firstName={user.firstName ??""} lastName={user.lastName??""} />
+                <UserAvatar size={"sm"} src={user.profilePictureUrl?.url} firstName={user.firstName!} lastName={user.lastName!} />
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium hidden md:inline-block">
                     <div className="capitalize"><span>{user.firstName}</span> <span>{user.lastName}</span></div>
