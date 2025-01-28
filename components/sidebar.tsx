@@ -128,7 +128,7 @@ export function Sidebar({ className, user }: SidebarProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="h-8 w-8 rounded-full bg-primary/10">
-                <UserAvatar src={user.profilePictureUrl ? user.profilePictureUrl.url : ""} firstName={user.firstName || ""} lastName={user.lastName || ""} />
+                <UserAvatar size={"sm"} src={user?.profilePictureUrl?.url!} firstName={user.firstName!} lastName={user.lastName!} />
               </div>
               <div className="space-y-1">
                 <div><span className="capitalize">{user.firstName}</span> <span className="capitalize">{user.lastName}</span></div>
