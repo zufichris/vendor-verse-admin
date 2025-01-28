@@ -52,6 +52,18 @@ class UserService {
             })
         }
     }
+    async getCustomerById(custId: string): Promise<IResponseData<TUser>> {
+        try {
+            if (!custId)
+                throw new Error("Invalid Customer ID")
+            const res = await request<IResponseData<TUser>>(`${this.baseUrl}/${custId}`)
+            return res
+        } catch (error) {
+            return this.handleError({
+                message: "Error Getting Customer"
+            })
+        }
+    }
     private handleError<T = IResponseData<TUser>>(err?: {
         message?: string,
         status?: number,
