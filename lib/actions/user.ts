@@ -21,3 +21,8 @@ export async function createNewUser(data: {
     const res = await userService.create(data)
     return res
 }
+
+export async function getCustomerById(custId: string) {
+    const res = await userService.getCustomerById(custId)
+    return res
+}
