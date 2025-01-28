@@ -26,18 +26,11 @@ export const SignInForm = () => {
                     password: formData.get("password") as string,
                 })
                 if (!result.success) {
-                    toast({
-                        variant: "destructive",
-                        title: "Error",
-                        description: result.message || "An unexpected error occurred. Please try again.",
-                    })
+                    toast(result)
                     return
                 }
 
-                toast({
-                    title: "Success",
-                    description: "Successfully signed in",
-                })
+                toast(result)
 
                 router.push("/")
                 router.refresh()
