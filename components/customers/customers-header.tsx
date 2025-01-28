@@ -2,12 +2,12 @@
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
-import { useCallback, useState } from "react"
+import { useCallback,} from "react"
 import { Card, CardContent, CardHeader } from "../ui/card"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Pagination } from "../ui/pagination"
+import { AddCustomerModal } from "./add-customer-modal"
 
-const ITEMS_PER_PAGE_OPTIONS = [1, 2, 3, 5, 10, 25, 50, 100]
+const ITEMS_PER_PAGE_OPTIONS = [5, 10, 25, 50, 100]
 
 interface StatsCardProps {
   title: string
@@ -83,6 +83,7 @@ export const CustomersHeader = ({ filterCount = 0, totalCount = 0, totalPages = 
 
   return (
     <div className="p-4">
+      <div className="w-full flex justify-end mb-2"><AddCustomerModal /></div>
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
         <StatsCard title="Total Users" value={totalCount} />
         <StatsCard title="Active Users" value={activeCount} />

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -17,32 +17,25 @@ import { Plus } from "lucide-react"
 import { FormSubmitButton } from "@/components/forms/form-submit-button"
 import { createNewUser } from "@/lib/actions/user"
 import { useToast } from "@/hooks/use-toast"
+import { useRouter } from "next/navigation"
 
 export function AddCustomerModal() {
   const { toast } = useToast()
+  const router = useRouter()
   const [open, setOpen] = useState(false)
   async function onSubmit(formData: FormData) {
-    try {
-      const data = {
-        email: formData.get("email")?.toString()!,
-        password: formData.get("password")?.toString()!,
-        firstName: formData.get("firstName")?.toString()!,
-        lastName: formData.get("lastName")?.toString()!,
-        phoneNumber: formData.get("phoneNumber")?.toString()!,
-      }
-      const res = await createNewUser(data)
-      if (!res.success) {
-        throw new Error("Error Creating User")
-      }
+    const data = {
+      email: formData.get("email")?.toString()!,
+      password: formData.get("password")?.toString()!,
+      firstName: formData.get("firstName")?.toString()!,
+      lastName: formData.get("lastName")?.toString()!,
+      phoneNumber: formData.get("phoneNumber")?.toString()!,
+    }
+    const res = await createNewUser(data)
+    toast(res)
+    if (res.success) {
       setOpen(false)
-      toast({
-        title: "User Created Successful"
-      })
-    } catch (error) {
-      toast({
-        title: "Error Creating User",
-        variant: "destructive"
-      })
+      router.refresh()
     }
   }
 

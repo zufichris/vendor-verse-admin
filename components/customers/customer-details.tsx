@@ -1,9 +1,7 @@
 "use client"
 
 import { format } from "date-fns"
-import {CreditCard, Edit, Mail, MapPin, Phone, User } from "lucide-react"
-import Image from "next/image"
-
+import { CreditCard, Edit, Mail, MapPin, Phone } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -11,74 +9,21 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import React, { useState } from "react"
 import { EditCustomerForm } from "./update-customer"
-
-const customer = {
-    id: "123",
-    custId: "CUST-001",
-    email: "john.doe@example.com",
-    isEmailVerified: true,
-    firstName: "John",
-    lastName: "Doe",
-    phoneNumber: "+1 (555) 123-4567",
-    isActive: true,
-    createdAt: new Date("2023-01-15"),
-    profilePictureUrl: {
-        external: false,
-        url: "/placeholder.svg",
-    },
-    address: {
-        street: "123 Main Street",
-        city: "San Francisco",
-        state: "CA",
-        country: "USA",
-        postalCode: "94105",
-    },
-    shippingAddresses: [
-        {
-            id: "addr1",
-            name: "Home",
-            street: "123 Main Street",
-            city: "San Francisco",
-            state: "CA",
-            country: "USA",
-            postalCode: "94105",
-            isDefault: true,
-        },
-    ],
-    paymentMethods: [
-        {
-            id: "pm1",
-            type: "Credit Card",
-            last4: "4242",
-            expiryDate: "12/25",
-            isDefault: true,
-        },
-    ],
-    stats: {
-        totalOrders: 47,
-        totalSpent: 15780,
-        averageOrderValue: 335.74,
-        favoriteShops: ["Fashion Store", "Electronics Hub"],
-        recentlyViewedProducts: 12,
-    },
-    wishlist: {
-        totalItems: 15,
-        recentlyAdded: ["iPhone 15", "Nike Air Max"],
-    },
-    lastLoginAt: new Date("2024-01-25"),
-    membershipTier: "Gold",
-    tags: ["Frequent Shopper", "Early Adopter"],
-    notes: "Prefers express shipping",
+import { TUser } from "@/lib/types/user"
+import { UserAvatar } from "../user-avatar"
+interface CustomerDetailsProps {
+    readonly customer: TUser
 }
 
-export default function CustomerDetails() {
+
+export default function CustomerDetails({ customer }: CustomerDetailsProps) {
     const [openEdit, setOpenEdit] = useState(false)
     return (
         <React.Fragment>
             <div className="container mx-auto py-10">
                 <div className="mb-8 flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl  tracking-tight">Customer Details</h1>
+                        <h1 className="text-3xl  tracking-tight">{customer.firstName} #{customer.custId}</h1>
                         <p className="text-muted-foreground">View and manage customer information</p>
                     </div>
                     <Button onClick={() => setOpenEdit(true)}>
@@ -90,19 +35,12 @@ export default function CustomerDetails() {
                 <div className="grid gap-6 lg:grid-cols-2">
                     <Card>
                         <CardHeader>
-                            <CardTitle>Customer Overview</CardTitle>
-                            <CardDescription>Basic information and status</CardDescription>
+                            <CardTitle>Overview</CardTitle>
+                            <CardDescription>Basic information</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <div className="flex items-center space-x-4">
-                                <div className="relative h-20 w-20 rounded-full overflow-hidden">
-                                    <Image
-                                        src={customer.profilePictureUrl?.url || "/placeholder.svg"}
-                                        alt={`${customer.firstName} ${customer.lastName}`}
-                                        fill
-                                        className="object-cover"
-                                    />
-                                </div>
+                            <UserAvatar size={"lg"} firstName={customer.firstName!} lastName={customer.lastName!} src={customer.profilePictureUrl?.url} />
                                 <div className="space-y-1">
                                     <h3 className="text-2xl font-semibold">
                                         {customer.firstName} {customer.lastName}
@@ -133,7 +71,7 @@ export default function CustomerDetails() {
                                     <Phone className="h-4 w-4 text-muted-foreground" />
                                     <div className="space-y-1">
                                         <p className="text-sm font-medium">Phone</p>
-                                        <p className="text-sm text-muted-foreground">{customer.phoneNumber || "Not provided"}</p>
+                                        <p className="text-sm text-muted-foreground">{customer.phoneNumber ?? "Not provided"}</p>
                                     </div>
                                 </div>
                             </div>
@@ -144,28 +82,29 @@ export default function CustomerDetails() {
                     <Card>
                         <CardHeader>
                             <CardTitle>Shopping Statistics</CardTitle>
-                            <CardDescription>Overview of shopping activity</CardDescription>
+                            <CardDescription>shopping activity</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <div className="grid gap-4 md:grid-cols-2">
                                 <div className="space-y-2">
                                     <p className="text-sm font-medium">Total Orders</p>
-                                    <p className="text-2xl font-bold">{customer.stats.totalOrders}</p>
+                                    <p className="text-2xl font-bold">{customer?.stats?.totalOrders ?? 0}</p>
                                 </div>
                                 <div className="space-y-2">
                                     <p className="text-sm font-medium">Total Spent</p>
-                                    <p className="text-2xl font-bold">${customer.stats.totalSpent?.toLocaleString()}</p>
+                                    <p className="text-2xl font-bold">${customer?.stats?.totalSpent?.toLocaleString() ?? 0}</p>
                                 </div>
                                 <div className="space-y-2">
-                                    <p className="text-sm font-medium">Membership Tier</p>
-                                    <Badge variant="secondary">{customer.membershipTier}</Badge>
+                                    <p className="text-sm font-medium">Lifetime Value</p>
+                                    <Badge variant="secondary">{customer?.lifetimeValue ?? 0}
+                                    </Badge>
                                 </div>
                                 <div className="space-y-2">
                                     <p className="text-sm font-medium">Favorite Shops</p>
                                     <div className="flex gap-2">
-                                        {customer.stats.favoriteShops?.map((shop) => (
-                                            <Badge key={shop} variant="outline">
-                                                {shop}
+                                        {(customer?.stats?.favoriteVendors ?? []).map((v) => (
+                                            <Badge key={v.vendorId} variant="outline">
+                                                {v.vendorName}
                                             </Badge>
                                         ))}
                                     </div>
@@ -216,7 +155,7 @@ export default function CustomerDetails() {
                                 <CardTitle>Payment Methods</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-6">
-                                {customer.paymentMethods.map((method) => (
+                                {/* {customer.paymentMethods.map((method) => (
                                     <div key={method.id} className="flex items-center justify-between">
                                         <div className="flex items-center space-x-4">
                                             <CreditCard className="h-4 w-4 text-muted-foreground" />
@@ -229,20 +168,23 @@ export default function CustomerDetails() {
                                         </div>
                                         {method.isDefault && <Badge variant="secondary">Default</Badge>}
                                     </div>
-                                ))}
+                                ))} */}
                             </CardContent>
                         </Card>
                     </TabsContent>
                     <TabsContent value="wishlist" className="space-y-4">
                         <Card>
                             <CardHeader>
-                                <CardTitle>Wishlist ({customer.wishlist.totalItems} items)</CardTitle>
+                                <CardTitle>Wishlist
+                                    {/* ({customer.wishlist.totalItems} items)
+                                     */}
+                                </CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-4">
                                     <div className="space-y-2">
                                         <p className="text-sm font-medium">Recently Added</p>
-                                        <div className="grid gap-2">
+                                        {/* <div className="grid gap-2">
                                             {customer.wishlist.recentlyAdded.map((item) => (
                                                 <div key={item} className="flex items-center justify-between">
                                                     <span className="text-sm">{item}</span>
@@ -251,7 +193,7 @@ export default function CustomerDetails() {
                                                     </Button>
                                                 </div>
                                             ))}
-                                        </div>
+                                        </div> */}
                                     </div>
                                 </div>
                             </CardContent>
