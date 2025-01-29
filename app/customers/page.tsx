@@ -18,7 +18,7 @@ export default async function CustomersPage({ searchParams }: CustomerPageProps)
       <CustomersHeader
         {...res}
       />
-      <CustomersList customers={res.data} />
+      <CustomersList customers={res.data} filterCount={res.filterCount} />
     </React.Fragment>
   )
 }
