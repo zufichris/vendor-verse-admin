@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 export const useQueryString = () => {
     const searchParams = useSearchParams()
     const router = useRouter()
-    const [search, setSearch] = useState("")
+    const [search, setSearch] = useState(new URLSearchParams(searchParams.toString()).toString())
     const queryString = useCallback(
         (qObj: Record<string, any>) => {
             const search = new URLSearchParams(searchParams.toString())
