@@ -8,102 +8,100 @@ export default function CustomersTableSkeleton() {
   return (
     <React.Fragment>
       {/* ==========================HEADER LOADER============= */}
-      <div className="space-y-6 mb-3">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="space-y-1">
-            <Skeleton className="h-8 w-[200px]" />
-            <Skeleton className="h-4 w-[300px]" />
-          </div>
+      <div className="space-y-4 p-4">
+        <div className="flex justify-end">
           <Skeleton className="h-10 w-[140px]" />
         </div>
 
-        <div className="grid gap-4 md:grid-cols-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i+1}>
-              <CardContent className="flex items-center gap-4 p-6">
-                <Skeleton className="h-6 w-6 rounded-full" />
-                <div className="space-y-2">
-                  <Skeleton className="h-4 w-[100px]" />
-                  <Skeleton className="h-6 w-[60px]" />
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <Card key={i}>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-col gap-2">
+                    <Skeleton className="h-4 w-24" />
+                    <div className="flex items-baseline gap-2">
+                      <Skeleton className="h-8 w-16" />
+                      <Skeleton className="h-4 w-12" />
+                    </div>
+                    <Skeleton className="h-3 w-32" />
+                  </div>
+                  <Skeleton className="h-11 w-11 rounded-full" />
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        <Separator />
-
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-3">
-          <Skeleton className="h-4 w-[200px]" />
-
-          <div className="flex flex-col sm:flex-row items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Skeleton className="h-4 w-[100px]" />
-              <Skeleton className="h-5 w-9 rounded-full" />
+        <div className="flex flex-col gap-4 p-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-5 w-9 rounded-full" />
+              </div>
+              <div className="h-4 w-px bg-border" />
+              <Skeleton className="h-9 w-[130px]" />
+              <div className="h-4 w-px bg-border" />
+              <Skeleton className="h-4 w-[250px]" />
             </div>
-            <Skeleton className="h-10 w-[110px]" />
-
             <div className="flex items-center gap-1">
-              <Skeleton className="h-10 w-10" />
-              <Skeleton className="h-4 w-[100px]" />
-              <Skeleton className="h-10 w-10" />
+              {[1, 2, 3, 4, 5].map((i) => (
+                <Skeleton key={i} className="h-8 w-8" />
+              ))}
             </div>
           </div>
         </div>
       </div>
       {/* =====================TABLE LOADER=================== */}
-      <Card className="relative w-full overflow-auto">
-        <div className="relative w-full overflow-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[60px]">ID</TableHead>
-                <TableHead>Customer</TableHead>
-                <TableHead className="hidden md:table-cell">Contact</TableHead>
-                <TableHead>Orders</TableHead>
-                <TableHead>Total Spent</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="hidden lg:table-cell">Last Order</TableHead>
-                <TableHead className="w-[60px] text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {Array.from({ length: 5 }).map((_, index) => (
-                <TableRow key={index + 1}>
-                  <TableCell>
-                    <Skeleton className="h-4 w-[20px]" />
-                  </TableCell>
-                  <TableCell>
+      <Card>
+        <div className="p-4 space-y-4">
+          {/* Header Skeleton */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <Skeleton className="h-8 w-32" /> {/* Title */}
+              <Skeleton className="h-8 w-20" /> {/* View switcher */}
+            </div>
+            <div className="flex items-center gap-4">
+              <Skeleton className="h-10 w-64" /> {/* Search input */}
+              <Skeleton className="h-10 w-24" /> {/* Sort button */}
+            </div>
+          </div>
+
+          {/* Grid Cards Skeleton */}
+          <div className="grid gap-4">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Card key={i} className="p-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-4">
+                    <Skeleton className="h-12 w-12 rounded-full" /> {/* Avatar */}
                     <div className="space-y-2">
-                      <Skeleton className="h-4 w-[100px]" />
-                      <Skeleton className="h-3 w-[60px]" />
+                      <div className="flex items-center gap-2">
+                        <Skeleton className="h-5 w-32" /> {/* Name */}
+                        <Skeleton className="h-5 w-16" /> {/* Status badge */}
+                      </div>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <Skeleton className="h-3 w-3" /> {/* Mail icon */}
+                          <Skeleton className="h-4 w-40" /> {/* Email */}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Skeleton className="h-3 w-3" /> {/* Phone icon */}
+                          <Skeleton className="h-4 w-32" /> {/* Phone */}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <Skeleton className="h-4 w-24" /> {/* Orders */}
+                        <Skeleton className="h-4 w-32" /> {/* Total Spent */}
+                        <Skeleton className="h-4 w-36" /> {/* Last Order */}
+                      </div>
                     </div>
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell">
-                    <div className="space-y-2">
-                      <Skeleton className="h-4 w-[160px]" />
-                      <Skeleton className="h-4 w-[110px]" />
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-[7px]" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-[40px]" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-6 w-[40px] rounded-full" />
-                  </TableCell>
-                  <TableCell className="hidden lg:table-cell">
-                    <Skeleton className="h-4 w-[60px]" />
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Skeleton className="h-8 w-8 rounded-md ml-auto" />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                  </div>
+                  <Skeleton className="h-8 w-8" /> {/* Action menu */}
+                </div>
+              </Card>
+            ))}
+          </div>
         </div>
       </Card>
     </React.Fragment>
