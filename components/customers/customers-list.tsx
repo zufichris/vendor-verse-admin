@@ -16,6 +16,8 @@ import type { TUser } from "@/lib/types/user"
 import { UserAvatar } from "../user-avatar"
 import Link from "next/link"
 import { CustomTableBody } from "../custom-table/body"
+import { getCustomers } from "@/lib/actions/user"
+import { ISearchData } from "@/lib/types/global"
 
 const sortFields = ["name", "email", "orders", "spent", "status", "lastOrder"]
 
@@ -63,6 +65,20 @@ const headers = [
 
 
 export function CustomersList({ customers, filterCount }: CustomerListProps) {
+  async function searchData(search: string): Promise<ISearchData[]> {
+    const res = await getCustomers(`search=${search}`)
+    if (res.success) {
+      return res.data.map(cust => ({
+        id: cust.custId!,
+        title: `${cust.firstName} ${cust.lastName ?? ""}`,
+        description: cust.email,
+        imageClass: "rounded",
+        link: `/customers/${cust.custId}`,
+        src: cust.profilePictureUrl?.url
+      }))
+    }
+    return []
+  }
   return (
     <CustomTableBody
       GridBody={<GridView customers={customers} />}
@@ -70,7 +86,13 @@ export function CustomersList({ customers, filterCount }: CustomerListProps) {
       headers={headers}
       filterCount={filterCount}
       sortFields={sortFields}
-      title="Customers" />
+      title="Customers"
+      search={{
+        searchFunction: searchData,
+        placeholder: "Search Customers",
+        imageFallback: <UserAvatar />
+      }}
+    />
   )
 }
 

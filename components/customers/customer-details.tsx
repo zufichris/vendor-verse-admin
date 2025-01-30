@@ -1,7 +1,7 @@
 "use client"
 
 import { format } from "date-fns"
-import { CreditCard, Edit, Mail, MapPin, Phone } from "lucide-react"
+import { Edit, Mail, MapPin, Phone } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
