@@ -9,10 +9,8 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    domains: ["*"],
     remotePatterns: [
       {
-
         protocol: "https",
         hostname: "**",
       },
