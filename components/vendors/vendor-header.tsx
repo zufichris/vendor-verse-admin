@@ -42,7 +42,7 @@ export function VendorsHeader() {
         <p className="text-muted-foreground">Manage your vendor partnerships</p>
       </div>
       <div className="flex flex-col sm:flex-row gap-4">
-        <SearchBar />
+
         <div className="flex gap-4">
           <Select defaultValue="all">
             <SelectTrigger className="w-[150px]">

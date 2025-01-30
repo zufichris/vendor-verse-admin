@@ -37,7 +37,7 @@ export function ProductsHeader() {
         <p className="text-muted-foreground">Manage your products and inventory</p>
       </div>
       <div className="flex flex-col sm:flex-row gap-4">
-        <SearchBar />
+
         <AddProductModal />
       </div>
     </div>

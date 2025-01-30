@@ -67,7 +67,7 @@ export function RecentOrders() {
           <CardTitle>Recent Orders</CardTitle>
           <p className="text-sm text-muted-foreground mt-1">Showing latest {orders.length} orders</p>
         </div>
-        <SearchBar />
+
       </CardHeader>
       <CardContent className="px-0 sm:px-6">
         <div className="overflow-auto">

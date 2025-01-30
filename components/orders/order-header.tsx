@@ -40,7 +40,7 @@ export function OrdersHeader() {
         <p className="text-muted-foreground">Manage and track your orders</p>
       </div>
       <div className="flex flex-col sm:flex-row gap-4">
-        <SearchBar />
+
         <AddOrderModal />
       </div>
     </div>
