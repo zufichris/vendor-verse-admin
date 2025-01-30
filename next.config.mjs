@@ -9,14 +9,20 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    unoptimized: true,
+    domains: ["*"],
+    remotePatterns: [
+      {
+
+        protocol: "https",
+        hostname: "**",
+      },
+    ],
   },
   experimental: {
     webpackBuildWorker: true,
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
   },
-
 }
 
 
