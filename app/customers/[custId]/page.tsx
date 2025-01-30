@@ -6,7 +6,7 @@ import { notFound } from 'next/navigation'
 import React from 'react'
 
 interface PageProps {
-  params: {
+  readonly params: {
     custId: string
   }
 }
