@@ -1,31 +1,32 @@
 'use client'
 
-import { IResponseDataPaginated } from "@/lib/types/global"
+import { IResponseDataPaginated, ISearchData } from "@/lib/types/global"
 import { useState } from "react"
-import { Card } from "../ui/card"
+import { Card} from "../ui/card"
 import { ViewSwitcher } from "../ui/table-view-switch"
-import { Input } from "../ui/input"
-import { ArrowUpDown, Search } from "lucide-react"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator } from "../ui/dropdown-menu"
-import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu"
+import { ArrowUpDown} from "lucide-react"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator,DropdownMenuTrigger } from "../ui/dropdown-menu"
 import { Button } from "../ui/button"
 import { Table, TableHead, TableHeader } from "../ui/table"
 import { useQueryString } from "@/hooks/use-query-string"
+import { SearchBar } from "../search"
 
 interface CustomTableBodyProps extends Pick<IResponseDataPaginated<unknown> & { success: true }, 'filterCount'> {
     readonly title: string,
     readonly headers: { title: string, classname?: string }[],
     readonly sortFields: string[],
     readonly GridBody: React.ReactNode,
-    readonly TableBody: React.ReactNode
+    readonly TableBody: React.ReactNode,
+    readonly search: {
+        searchFunction: (searchString: string) => Promise<ISearchData[]>,
+        placeholder?: string
+        imageFallback?: React.ReactNode
+    }
 }
-type SortOrder = "asc" | "desc"
 
-export function CustomTableBody({ title, headers, sortFields, GridBody, TableBody, filterCount }: CustomTableBodyProps) {
+export function CustomTableBody({ title, search, headers, sortFields, GridBody, TableBody, filterCount }: CustomTableBodyProps) {
     const [view, setView] = useState<"table" | "grid">("grid")
-    const [searchQuery, setSearchQuery] = useState("")
-    const [sortField, setSortField] = useState<string>(sortFields[0])
-    const [sortOrder, setSortOrder] = useState<SortOrder>("asc")
+
     const { queryString, searchParams } = useQueryString()
 
     function handleSortField(field?: string) {
@@ -48,15 +49,8 @@ export function CustomTableBody({ title, headers, sortFields, GridBody, TableBod
                             <ViewSwitcher view={view} onViewChange={setView} />
                         </div>
                         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4">
-                            <div className="relative flex-1 sm:flex-none sm:w-64">
-                                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    placeholder="Search customers..."
-                                    className="pl-8 w-full"
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                />
-                            </div>
+                            <SearchBar imageFallback={search.imageFallback}
+                                placeholder={search.placeholder} fetcher={search.searchFunction} />
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="outline" size="sm" className="w-full sm:w-auto">
@@ -105,3 +99,7 @@ export function CustomTableBody({ title, headers, sortFields, GridBody, TableBod
         </Card>
     )
 }
+
+
+
+
