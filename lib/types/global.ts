@@ -48,3 +48,12 @@ export interface IQueryFilters<TData> {
     filter?: Partial<TData>,
     queryOptions?: Partial<{ limit: number, sort: Partial<{ [key in keyof TData]: 1 | -1 }>, page: number }>
 }
+
+export interface ISearchData {
+    readonly title: string,
+    readonly id: string
+    readonly description?: string,
+    readonly src?: string,
+    readonly link?: string
+}
+
