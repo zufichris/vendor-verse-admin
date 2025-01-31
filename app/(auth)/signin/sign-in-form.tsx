@@ -5,15 +5,24 @@ import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
 import { signIn } from '@/lib/actions/auth'
 import { Store } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Label } from "@/components/ui/label"
-import React, { useTransition } from 'react'
+import React, { useEffect, useTransition } from 'react'
 import { request } from '@/lib/utils'
 
 export const SignInForm = () => {
     const [isPending, startTransition] = useTransition()
     const { toast } = useToast()
     const router = useRouter()
+    const searchParams = useSearchParams()
+    useEffect(() => {
+        if (searchParams.get("error")) {
+            toast({
+                message: "Google Signin Error",
+                success: false,
+            })
+        }
+    }, [])
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault()
@@ -119,7 +128,6 @@ export const SignInForm = () => {
                                         focusable="false"
                                         data-prefix="fab"
                                         data-icon="google"
-                                        role="img"
                                         xmlns="http://www.w3.org/2000/svg"
                                         viewBox="0 0 488 512"
                                     >
