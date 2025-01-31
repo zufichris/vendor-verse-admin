@@ -1,41 +1,31 @@
 "use client"
 
-import React, { useState, useEffect, useCallback } from "react"
+import React, { useState, useEffect} from "react"
 import { Sidebar } from "@/components/sidebar"
 import { Button } from "@/components/ui/button"
-import { Menu} from "lucide-react"
+import { Menu } from "lucide-react"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { DashboardHeader } from "./dashboard-header"
 import { TUser } from "@/lib/types/user"
-import { logout } from "@/lib/actions/auth"
-import { useRouter } from "next/navigation"
 
 interface DashboardShellProps {
-  children: React.ReactNode,
-  user: TUser,
-  success: boolean
+  readonly children: React.ReactNode,
+  readonly user: TUser,
+  readonly success: boolean
 }
 
 export function DashboardShell({ children, user, success = false }: DashboardShellProps) {
-  const router = useRouter()
   const [isMounted, setIsMounted] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
-  const signOut = useCallback(async () => {
-    if (!success) {
-      await logout()
-      router.push("/signin")
-    }
-  }, [success])
+
   useEffect(() => {
     setIsMounted(true)
-    signOut()
-  }, [signOut])
+  }, [isMounted])
 
   if (!isMounted) {
     return null
   }
-  if (!success) return null
   return (
     <div className="flex min-h-screen w-full">
       {/* Desktop Sidebar */}

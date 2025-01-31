@@ -13,11 +13,13 @@ export const metadata: Metadata = {
   description: "Multi-vendor E-commerce Admin Dashboard",
 }
 
+interface RootLayoutProps {
+  readonly children: React.ReactNode
+}
+
 export default async function RootLayout({
   children,
-}: {
-  children: React.ReactNode
-}) {
+}: RootLayoutProps) {
   const res = await getLoggedInUser()
   return (
     <html lang="en" suppressHydrationWarning>
