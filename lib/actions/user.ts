@@ -1,8 +1,10 @@
 'use server'
 import { userService } from "../services/user"
+import { getToken } from "./auth"
 
 export async function getLoggedInUser() {
-    const res = await userService.getLoggedInUser()
+    const accessToken = await getToken("access_token")
+    const res = await userService.getLoggedInUser(accessToken!, process.env.JWT_SECRET!)
     return res
 }
 

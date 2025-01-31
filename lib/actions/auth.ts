@@ -26,10 +26,6 @@ export async function signIn({ email, password }: { email: string, password: str
 export async function googleSignIn(code: string) {
     try {
         const data = await request<IResponseData<TUser>>(`/auth/google/callback?code=${code}`)
-        if (data.success && data.data.tokenPair) {
-            setCookie("access_token", data.data.tokenPair?.accessToken!)
-            setCookie("refresh_token", data.data.tokenPair?.refreshToken!)
-        }
         return data;
     } catch (error) {
         throw error
@@ -43,9 +39,10 @@ export async function logout() {
 }
 export async function getToken(type: 'access_token' | 'refresh_token'): Promise<string | null> {
     const cookieStore = cookies()
-    return cookieStore.get(type)?.value || null
+    return cookieStore.get(type)?.value ?? null
 }
 export async function setCookie(type: 'access_token' | 'refresh_token', value: string) {
     const cookieStore = await cookies()
     cookieStore.set(type, value)
+    console.log("Setted", type, value)
 }

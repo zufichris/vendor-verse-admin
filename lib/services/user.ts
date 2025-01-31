@@ -1,7 +1,7 @@
 import { IResponseData, IResponseDataPaginated } from "../types/global"
 import { TUser } from "../types/user"
 import { request } from "../utils"
-
+import jwt from "jsonwebtoken"
 class UserService {
     constructor(private readonly baseUrl = '/users') {
         this.create = this.create.bind(this)
@@ -42,13 +42,26 @@ class UserService {
             })
         }
     }
-    async getLoggedInUser(): Promise<IResponseData<TUser>> {
+    async getLoggedInUser(access_token: string, secret: string): Promise<IResponseData<TUser>> {
         try {
-            const res = await request<IResponseData<TUser>>('/me')
-            return res
+            if (!access_token || !secret) {
+                throw new Error("Invalid Verification Data")
+            }
+            const data = jwt.verify(access_token, secret) as Record<string, unknown>
+
+            if (!data['email']) {
+                throw new Error("Invalid Token")
+            }
+
+            return ({
+                success: true,
+                data: data as TUser,
+                message: "User Retrieved Successfully",
+                status: 200,
+            })
         } catch (error) {
             return this.handleError({
-                message: "Login Error"
+                message: "Error Retrieving User"
             })
         }
     }
