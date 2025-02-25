@@ -1,11 +1,15 @@
+import { promisify } from "util"
 import { IResponseData, IResponseDataPaginated } from "../types/global"
 import { TUser } from "../types/user"
 import { request } from "../utils"
 import jwt from "jsonwebtoken"
+import { createMockUser, createMockUsers } from "../mock/mock"
 class UserService {
     constructor(private readonly baseUrl = '/users') {
         this.create = this.create.bind(this)
         this.getCustomers = this.getCustomers.bind(this)
+        this.getLoggedInUser = this.getLoggedInUser.bind(this)
+        this.getCustomerById = this.getCustomerById.bind(this)
     }
     async create(data: {
         email: string,
@@ -15,11 +19,13 @@ class UserService {
         phoneNumber: string,
     }): Promise<IResponseData<TUser>> {
         try {
-            const res = await request<IResponseData<TUser>>(this.baseUrl, {
-                method: "POST",
-                body: JSON.stringify(data)
-            })
-            return res
+            await promisify(setTimeout)(1000)
+            return {
+                success: true,
+                data: createMockUser(),
+                message: "User Created Successfully",
+                status: 200,
+            }
         } catch (error) {
             return this.handleError({
                 message: "Error Creating User"
@@ -31,33 +37,38 @@ class UserService {
         suspendedCount: number,
     }> {
         try {
-            const res = await request<IResponseDataPaginated<TUser> & {
-                activeCount: number,
-                suspendedCount: number,
-            }>(`${this.baseUrl}/?${qs ?? ""}`)
-            return res
+            await promisify(setTimeout)(1000)
+            return {
+                success: true,
+                data: createMockUsers(),
+                message: "Customers Retrieved Successfully",
+                status: 200,
+                activeCount: 5,
+                suspendedCount: 5,
+                filterCount: 10,
+                totalCount: 10,
+                firstItemIndex: 0,
+                lastItemIndex: 9,
+                hasNextPage: false,
+                hasPreviousPage: false,
+                limit: 10,
+                page: 1,
+                totalPages: 1,
+            }
         } catch (error) {
             return this.handleError({
                 message: "Error Getting Customers"
             })
         }
     }
-    async getLoggedInUser(access_token: string, secret: string): Promise<IResponseData<TUser>> {
+    async getLoggedInUser(access_token?: string, secret?: string): Promise<IResponseData<TUser>> {
         try {
-            if (!access_token || !secret) {
-                throw new Error("Invalid Verification Data")
-            }
-            const data = jwt.verify(access_token, secret) as Record<string, unknown>
-
-            if (!data['email']) {
-                throw new Error("Invalid Token")
-            }
-
+            await promisify(setTimeout)(1000)
             return ({
                 success: true,
-                data: data as TUser,
                 message: "User Retrieved Successfully",
                 status: 200,
+                data: createMockUser()
             })
         } catch (error) {
             return this.handleError({
@@ -65,12 +76,15 @@ class UserService {
             })
         }
     }
-    async getCustomerById(custId: string): Promise<IResponseData<TUser>> {
+    async getCustomerById(custId?: string): Promise<IResponseData<TUser>> {
         try {
-            if (!custId)
-                throw new Error("Invalid Customer ID")
-            const res = await request<IResponseData<TUser>>(`${this.baseUrl}/${custId}`)
-            return res
+            await promisify(setTimeout)(1000)
+            return {
+                success: true,
+                data: createMockUser(),
+                message: "Customer Retrieved Successfully",
+                status: 200,
+            }
         } catch (error) {
             return this.handleError({
                 message: "Error Getting Customer"

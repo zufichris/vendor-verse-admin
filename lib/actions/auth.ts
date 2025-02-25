@@ -4,29 +4,30 @@ import { cookies } from "next/headers";
 import { IResponseData } from "../types/global";
 import { TUser } from "../types/user";
 import { request } from "../utils";
+import { userService } from "../services/user";
 
 export async function signIn({ email, password }: { email: string, password: string }) {
     try {
-        const data = await request<IResponseData<TUser>>("/auth/login", {
-            method: "POST",
-            body: JSON.stringify({
-                email,
-                password,
-            }),
-        });
-        if (data.success && data.data.tokenPair) {
-            setCookie("access_token", data.data.tokenPair?.accessToken!)
-            setCookie("refresh_token", data.data.tokenPair?.refreshToken!)
-        }
-        return data;
+        // const data = await request<IResponseData<TUser>>("/auth/login", {
+        //     method: "POST",
+        //     body: JSON.stringify({
+        //         email,
+        //         password,
+        //     }),
+        // });
+        // if (data.success && data.data.tokenPair) {
+        //     setCookie("access_token", data.data.tokenPair?.accessToken!)
+        //     setCookie("refresh_token", data.data.tokenPair?.refreshToken!)
+        // }
+        return userService.getLoggedInUser(email, process.env.JWT_SECRET!);
     } catch (error) {
         throw error
     }
 }
 export async function googleSignIn(code: string) {
     try {
-        const data = await request<IResponseData<TUser>>(`/auth/google/callback?code=${code}`)
-        return data;
+        // const data = await request<IResponseData<TUser>>(`/auth/google/callback?code=${code}`)
+        return userService.getLoggedInUser(code, process.env.JWT_SECRET!);
     } catch (error) {
         throw error
     }
@@ -44,5 +45,4 @@ export async function getToken(type: 'access_token' | 'refresh_token'): Promise<
 export async function setCookie(type: 'access_token' | 'refresh_token', value: string) {
     const cookieStore = await cookies()
     cookieStore.set(type, value)
-    console.log("Setted", type, value)
 }

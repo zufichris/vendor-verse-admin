@@ -125,7 +125,7 @@ function TableView({ customers }: BodyProps) {
               <div className="text-sm text-muted-foreground sm:hidden flex items-center gap-2">
                 <span>Orders: {customer?.stats?.totalOrders ?? 0}</span>
                 <span>•</span>
-                <span>${customer?.stats?.totalSpent ?? 0}</span>
+                <span>${customer?.stats?.totalSpent.toFixed(2)?? 0}</span>
               </div>
             </div>
           </div>
@@ -216,7 +216,7 @@ function GridView({ customers }: BodyProps) {
                 </div>
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
                   <span>Orders: {customer?.stats?.totalOrders ?? 0}</span>
-                  <span>Total Spent: ${customer?.stats?.totalSpent ?? 0}</span>
+                  <span>Total Spent: ${customer?.stats?.totalSpent.toFixed(2) ?? 0}</span>
                   {customer?.stats?.ordersHistory[0]?.orderId && (
                     <span className="truncate">Last Order: #{customer?.stats?.ordersHistory[0]?.orderId}</span>
                   )}

@@ -63,6 +63,7 @@
     "zod": "latest"
   },
   "devDependencies": {
+    "@faker-js/faker": "^9.5.0",
     "@types/node": "^22",
     "@types/react": "^18",
     "@types/react-dom": "^18",
