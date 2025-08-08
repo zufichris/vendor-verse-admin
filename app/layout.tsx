@@ -1,39 +1,65 @@
-import type { Metadata } from "next"
-import { Inter } from "next/font/google"
-import "@/styles/globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
-import { ToastProvider } from "@/components/providers/toast-provider"
-import { DashboardShell } from "@/components/dashboard-shell"
-import { getLoggedInUser } from "@/lib/actions/user"
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+import Link from "next/link";
+import { getLoggedInUser } from "@/lib/actions/auth.actions";
+import { LoginForm } from "@/components/auth/login-form";
 
-const inter = Inter({ subsets: ["latin"] })
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
 
 export const metadata: Metadata = {
-  title: "VendorVerse Admin",
-  description: "Multi-vendor E-commerce Admin Dashboard",
-}
-
-interface RootLayoutProps {
-  readonly children: React.ReactNode
-}
+  title: "Vendor Verse Admin",
+  description: "Admin dashboard for managing Vendor Verse",
+};
 
 export default async function RootLayout({
   children,
-}: RootLayoutProps) {
-  const res = await getLoggedInUser()
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  const result = await getLoggedInUser();
+  if (!result.success) {
+    return (
+      <html lang="en">
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased p-2 md:p-4 lg:p-8 bg-background text-foreground`}
+        >
+          <main className="flex items-center justify-center h-screen">
+            <LoginForm />
+          </main>
+        </body>
+      </html>
+    );
+  }
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
       <body
-        className={`${inter.className}  min-h-screen bg-gradient-to-b from-background to-muted/20 dark:from-background dark:to-muted/20`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased p-2 md:p-4 lg:p-8 bg-background text-foreground`}
       >
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
-          {res?.success ? <DashboardShell user={res?.data} success={res.success}>
-            {children}
-          </DashboardShell> : <>{children}</>}
-          <ToastProvider />
-        </ThemeProvider>
+        <header className="mb-4">
+          <nav className="flex flex-col md:flex-row items-center justify-between">
+            <div className="flex items-center justify-between">
+              <Link href={"/"} className="text-5xl font-bold">
+                LOGO
+              </Link>
+            </div>
+            <div className="flex space-x-4">
+              <Link href={"/products"}>Prodcts</Link>
+              <Link href={"/users"}>Users</Link>
+              <Link href={"/orders"}>Orders</Link>
+            </div>
+          </nav>
+        </header>
+        <main>{children}</main>
       </body>
     </html>
-  )
+  );
 }
-
