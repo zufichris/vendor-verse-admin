@@ -61,7 +61,7 @@ export async function updateProduct(id: string, data: UpdateProductDto) {
 }
 
 export async function deleteProduct(id: string) {
-    const result = await Api.delete(`/products/${id}`);
+    const result = await Api.delete(`/products/admin/${id}`);
     if (result.success) revalidatePath("/products");
     return result;
 }
