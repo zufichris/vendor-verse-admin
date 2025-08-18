@@ -9,7 +9,7 @@ import type {
 } from "@/types/pagination.types";
 import { Api } from "@/utils/api";
 import { error } from "console";
-
+1234
 export async function getProducts(params: PaginationParams = {}) {
     const {
         page = 1,
