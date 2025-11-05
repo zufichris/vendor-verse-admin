@@ -1,7 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CreateOrderForm } from "@/components/orders/create-order-form"
+import { getProducts } from "@/lib/actions/product.actions"
 
-export default function NewOrderPage() {
+export default async function NewOrderPage() {
+  const products = await getProducts()
+
   return (
     <div className="space-y-6">
       <div>
@@ -14,7 +17,7 @@ export default function NewOrderPage() {
           <CardTitle>Order Details</CardTitle>
         </CardHeader>
         <CardContent>
-          <CreateOrderForm />
+          <CreateOrderForm defaultProducts={products.data?.data || []} />
         </CardContent>
       </Card>
     </div>

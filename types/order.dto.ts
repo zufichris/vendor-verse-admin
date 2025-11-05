@@ -8,6 +8,7 @@ export const CreateOrderDtoSchema = z.object({
   tax: z.number().default(0),
   shipping: z.number().default(0),
   notes: z.string().optional(),
+  userId: z.string().optional().nullable() // We can create anonyouse order on behalf od user and share payment link to them
 })
 
 export const UpdateOrderDtoSchema = z.object({

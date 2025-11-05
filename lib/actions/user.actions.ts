@@ -7,32 +7,7 @@ import { type User, UserStatus, UserRole, Gender } from "@/types/user.types";
 import type { UserAnalytics } from "@/types/user.dto";
 import type { PaginationResult } from "@/types/pagination.types";
 import { Api } from "@/utils/api";
-import { Urbanist } from "next/font/google";
-
-// Validation schemas
-const createUserSchema = z.object({
-  firstName: z.string().min(1, "First name is required").max(50),
-  lastName: z.string().min(1, "Last name is required").max(50),
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  phone: z.string().optional(),
-  dateOfBirth: z.string().optional(),
-  gender: z.nativeEnum(Gender).optional(),
-  role: z.nativeEnum(UserRole).default(UserRole.CUSTOMER),
-  referredBy: z.string().optional(),
-  marketingConsent: z.boolean().optional(),
-});
-
-const updateUserSchema = z.object({
-  firstName: z.string().min(1).max(50).optional(),
-  lastName: z.string().min(1).max(50).optional(),
-  phone: z.string().optional(),
-  dateOfBirth: z.string().optional(),
-  gender: z.nativeEnum(Gender).optional(),
-  role: z.nativeEnum(UserRole).optional(),
-  status: z.nativeEnum(UserStatus).optional(),
-  profileImage: z.string().optional(),
-});
+import { CreateUserDTO } from "../validations/user.validation";
 
 export async function getUsers(
   page = 1,
@@ -41,13 +16,21 @@ export async function getUsers(
   status?: UserStatus,
   role?: UserRole,
 ) {
-  const query = new URLSearchParams({
+  const query = new URLSearchParams();
+
+  const queryObj: Record<string, string | undefined> = {
     page: page.toString(),
     limit: limit.toString(),
-    search: search || "",
-    status: status || "",
-    role: role || "",
-  });
+    search,
+    status,
+    role
+  }
+
+  Object.keys(queryObj).map(k => {
+    if (queryObj[k]?.trim()) {
+      query.append(k, queryObj[k].trim())
+    }
+  })
 
   const result = await Api.get<PaginationResult<User>>(
     `/users?${query.toString()}`,
@@ -55,29 +38,30 @@ export async function getUsers(
   return result;
 }
 
+export const getUsersAnalytics = async () => {
+  const result = await Api.get<{
+    totalUsers: number;
+    activeUsers: number;
+    newUsersToday: number;
+    newUsersThisWeek: number;
+    newUsersThisMonth: number;
+  }>('/users/analytics')
+
+  return result.data;
+}
+
 export async function getUserById(id: string) {
   const result = await Api.get<User>(`/users/${id}`);
   return result;
 }
 
-export async function createUser(formData: FormData) {
-  const data = {
-    firstName: formData.get("firstName"),
-    lastName: formData.get("lastName"),
-    email: formData.get("email"),
-    password: formData.get("password"),
-    phone: formData.get("phone"),
-    dateOfBirth: formData.get("dateOfBirth"),
-    gender: formData.get("gender"),
-    role: formData.get("role"),
-    referredBy: formData.get("referredBy"),
-    marketingConsent: formData.get("marketingConsent") === "on",
-  };
-
-  const result = await Api.post<User>("/users", data);
-  revalidatePath("/admin/users");
-  redirect("/admin/users");
-  return result;
+export async function createUser(data: CreateUserDTO) {
+  const result = await Api.post<User>("/users/register", data);
+  if (!result.success) {
+    throw result;
+  }
+  revalidatePath("/users");
+  redirect("/users");
 }
 
 export async function updateUser(id: string, formData: FormData) {
@@ -93,22 +77,22 @@ export async function updateUser(id: string, formData: FormData) {
   };
 
   const result = await Api.put<User>(`/users/${id}`, data);
-  revalidatePath("/admin/users");
-  revalidatePath(`/admin/users/${id}`);
+  revalidatePath("/users");
+  revalidatePath(`/users/${id}`);
   return result;
 }
 
 export async function deleteUser(id: string) {
   const result = await Api.delete(`/users/${id}`);
-  revalidatePath("/admin/users");
+  revalidatePath("/users");
   return result;
 }
 
 export async function toggleUserStatus(id: string, status: UserStatus) {
-  const result = await Api.patch(`/users/${id}/status`, { status });
+  const result = await Api.put(`/users/${id}/status`, { status });
 
-  revalidatePath("/admin/users");
-  revalidatePath(`/admin/users/${id}`);
+  revalidatePath("/users");
+  revalidatePath(`/users/${id}`);
   return result;
 }
 
@@ -117,6 +101,6 @@ export async function getUserAnalytics(userId: string) {
   return result;
 }
 export async function resetUserPassword(id: string, newPassword: string) {
-  revalidatePath("/admin/users");
-  revalidatePath(`/admin/users/${id}`);
+  revalidatePath("/users");
+  revalidatePath(`/users/${id}`);
 }

@@ -17,9 +17,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { getUserById } from "@/lib/actions/user.actions";
+import { getUserById, toggleUserStatus } from "@/lib/actions/user.actions";
 import { UserStatus, UserRole } from "@/types/user.types";
 import { UserDetailsSkeleton } from "@/components/users/user-details-skeleton";
+import { cn } from "@/lib/utils";
+import { ActivateDeactivateUserModal } from "@/components/users/change-status-modal";
 
 interface UserPageProps {
     params: Promise<{
@@ -69,6 +71,11 @@ async function UserContent({ params }: UserPageProps) {
         }).format(amount);
     };
 
+    const handleDeactivateUser = async()=>{
+        const newStatus = user.status === UserStatus.ACTIVE ? UserStatus.INACTIVE : UserStatus.ACTIVE
+        await toggleUserStatus(user.id, newStatus)
+    }
+
     return (
         <div className="space-y-6">
             {/* Header */}
@@ -88,37 +95,15 @@ async function UserContent({ params }: UserPageProps) {
                         </h1>
                         <p className="text-muted-foreground">{user.email}</p>
                         <div className="flex items-center space-x-2 mt-1">
-                            <Badge className={roleColors[user.role]}>{user.role}</Badge>
-                            <Badge className={statusColors[user.status]}>
+                            <Badge className={cn(roleColors[user.role], 'uppercase')}>{user.role}</Badge>
+                            <Badge className={cn(statusColors[user.status], 'uppercase')}>
                                 {user.status.replace("_", " ")}
                             </Badge>
                         </div>
                     </div>
                 </div>
                 <div className="flex items-center space-x-2">
-                    <Button variant="outline" asChild>
-                        <Link href={`/users/${user.id}/edit`}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit
-                        </Link>
-                    </Button>
-                    <Button variant="outline">
-                        <Key className="mr-2 h-4 w-4" />
-                        Reset Password
-                    </Button>
-                    <Button variant="outline">
-                        {user.status === UserStatus.ACTIVE ? (
-                            <>
-                                <UserX className="mr-2 h-4 w-4" />
-                                Deactivate
-                            </>
-                        ) : (
-                            <>
-                                <UserCheck className="mr-2 h-4 w-4" />
-                                Activate
-                            </>
-                        )}
-                    </Button>
+                    <ActivateDeactivateUserModal user={user} />
                 </div>
             </div>
 

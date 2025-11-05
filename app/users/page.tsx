@@ -3,7 +3,7 @@ import { Plus, Users, UserCheck, Clock } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getUsers, getUserAnalytics } from "@/lib/actions/user.actions";
+import { getUsers, getUserAnalytics, getUsersAnalytics } from "@/lib/actions/user.actions";
 import type { UserStatus, UserRole } from "@/types/user.types";
 import { UsersTable } from "@/components/users/users-table";
 import { UsersTableSkeleton } from "@/components/users/users-table-skeleton";
@@ -18,6 +18,8 @@ interface UsersPageProps {
 }
 
 async function UsersStats() {
+  const stats = await getUsersAnalytics()
+
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
       <Card>
@@ -26,7 +28,7 @@ async function UsersStats() {
           <Users className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{10}</div>
+          <div className="text-2xl font-bold">{stats?.totalUsers || 0}</div>
         </CardContent>
       </Card>
       <Card>
@@ -35,7 +37,7 @@ async function UsersStats() {
           <UserCheck className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{10}</div>
+          <div className="text-2xl font-bold">{stats?.activeUsers || 0}</div>
         </CardContent>
       </Card>
       <Card>
@@ -44,7 +46,7 @@ async function UsersStats() {
           <Clock className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{4}</div>
+          <div className="text-2xl font-bold">{stats?.newUsersToday || 0}</div>
         </CardContent>
       </Card>
       <Card>
@@ -53,7 +55,7 @@ async function UsersStats() {
           <Clock className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{8}</div>
+          <div className="text-2xl font-bold">{stats?.newUsersThisWeek || 0}</div>
         </CardContent>
       </Card>
       <Card>
@@ -62,7 +64,7 @@ async function UsersStats() {
           <Clock className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{7}</div>
+          <div className="text-2xl font-bold">{stats?.newUsersThisMonth || 0}</div>
         </CardContent>
       </Card>
     </div>

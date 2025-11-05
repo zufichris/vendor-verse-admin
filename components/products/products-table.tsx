@@ -49,6 +49,7 @@ import {
 } from "@/lib/actions/product.actions";
 import { useToast } from "@/hooks/use-toast";
 import { string } from "zod/v3";
+import ProductDescription from "./product-description";
 
 interface ProductsTableProps {
     paginatedProducts: PaginationResult<Product>;
@@ -240,7 +241,7 @@ export function ProductsTable({ paginatedProducts }: ProductsTableProps) {
                                             {product.name}
                                         </div>
                                         <div className="text-sm text-muted-foreground line-clamp-2">
-                                            {product.description}
+                                            <ProductDescription description={product.description} />
                                         </div>
                                         {product.featured && (
                                             <Badge variant="outline" className="text-xs">

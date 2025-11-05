@@ -18,15 +18,15 @@ import { Badge } from "@/components/ui/badge"
 import { MoreHorizontal, Search, Eye, Edit, Truck, RefreshCw, DollarSign, X } from "lucide-react"
 import Link from "next/link"
 import type { Order, OrderFilters, FulfillmentStatus } from "@/types/order.types"
-import type { PaginationInfo } from "@/types/pagination.types"
-import { Pagination } from "@/components/ui/pagination"
+import type { PaginationResult } from "@/types/pagination.types"
 import { updateOrderStatus, refundOrder } from "@/lib/actions/order.actions"
 import { DeleteOrderModal } from "./delete-order-modal"
 import { toast } from "sonner"
+import { SimplePagination } from "../ui/simple-pagination"
+import { cn } from "@/lib/utils"
 
 interface OrdersTableProps {
-  orders: Order[]
-  pagination: PaginationInfo
+  pagination: PaginationResult<Order>
   filters: OrderFilters
 }
 
@@ -47,7 +47,8 @@ const paymentStatusColors = {
   "partially-refunded": "bg-orange-100 text-orange-800",
 }
 
-export function OrdersTable({ orders, pagination, filters }: OrdersTableProps) {
+export function OrdersTable({ pagination, filters }: OrdersTableProps) {
+  const orders = pagination?.data || [];
   const router = useRouter()
   const searchParams = useSearchParams()
   const [deleteOrderId, setDeleteOrderId] = useState<string | null>(null)
@@ -55,17 +56,17 @@ export function OrdersTable({ orders, pagination, filters }: OrdersTableProps) {
 
   const updateSearchParams = (key: string, value: string | null) => {
     const params = new URLSearchParams(searchParams.toString())
-    if (value) {
+    if (value?.trim() && value.trim() !== 'all') {
       params.set(key, value)
     } else {
       params.delete(key)
     }
     params.delete("page") // Reset to first page when filtering
-    router.push(`/admin/orders?${params.toString()}`)
+    router.push(`/orders?${params.toString()}`)
   }
 
   const clearFilters = () => {
-    router.push("/admin/orders")
+    router.push("/orders")
   }
 
   const handleStatusUpdate = async (orderId: string, status: FulfillmentStatus) => {
@@ -73,6 +74,7 @@ export function OrdersTable({ orders, pagination, filters }: OrdersTableProps) {
     try {
       await updateOrderStatus(orderId, status)
       toast.success("Order status updated successfully")
+      router.refresh()
     } catch (error) {
       toast.error("Failed to update order status")
     } finally {
@@ -127,8 +129,8 @@ export function OrdersTable({ orders, pagination, filters }: OrdersTableProps) {
           </div>
 
           <Select
-            value={filters.fulfillmentStatus || "all"}
-            onValueChange={(value) => updateSearchParams("fulfillmentStatus", value || null)}
+            value={filters.status || "all"}
+            onValueChange={(value) => updateSearchParams("status", value || null)}
           >
             <SelectTrigger className="w-[150px]">
               <SelectValue placeholder="Status" />
@@ -224,12 +226,12 @@ export function OrdersTable({ orders, pagination, filters }: OrdersTableProps) {
                     <div className="text-sm text-muted-foreground">{order.payment.method}</div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="secondary" className={paymentStatusColors[order.payment.status]}>
+                    <Badge variant="secondary" className={cn(paymentStatusColors[order.payment.status], 'uppercase')}>
                       {order.payment.status}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="secondary" className={fulfillmentStatusColors[order.fulfillmentStatus]}>
+                    <Badge variant="secondary" className={cn(fulfillmentStatusColors[order.fulfillmentStatus], 'uppercase')}>
                       {order.fulfillmentStatus}
                     </Badge>
                   </TableCell>
@@ -251,17 +253,17 @@ export function OrdersTable({ orders, pagination, filters }: OrdersTableProps) {
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuItem asChild>
-                          <Link href={`/admin/orders/${order.id}`}>
+                          <Link href={`/orders/${order.id}`}>
                             <Eye className="mr-2 h-4 w-4" />
                             View Details
                           </Link>
                         </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link href={`/admin/orders/${order.id}/edit`}>
+                        {/* <DropdownMenuItem asChild>
+                          <Link href={`/orders/${order.id}/edit`}>
                             <Edit className="mr-2 h-4 w-4" />
                             Edit Order
                           </Link>
-                        </DropdownMenuItem>
+                        </DropdownMenuItem> */}
                         <DropdownMenuSeparator />
 
                         {order.fulfillmentStatus === "pending" && (
@@ -285,7 +287,7 @@ export function OrdersTable({ orders, pagination, filters }: OrdersTableProps) {
                           </DropdownMenuItem>
                         )}
 
-                        {order.payment.status === "paid" && (
+                        {order.payment.status === "paid" && order.fulfillmentStatus !== 'delivered' && (
                           <DropdownMenuItem onClick={() => handleRefund(order.id)}>
                             <DollarSign className="mr-2 h-4 w-4" />
                             Refund Order
@@ -307,14 +309,14 @@ export function OrdersTable({ orders, pagination, filters }: OrdersTableProps) {
       </div>
 
       {/* Pagination */}
-      {pagination.totalPages > 1 && (
-        <Pagination
+      {pagination?.totalPages > 1 && (
+        <SimplePagination
+          {...pagination}
           currentPage={pagination.page}
-          totalPages={pagination.totalPages}
           onPageChange={(page) => {
             const params = new URLSearchParams(searchParams.toString())
             params.set("page", page.toString())
-            router.push(`/admin/orders?${params.toString()}`)
+            router.push(`/orders?${params.toString()}`)
           }}
         />
       )}

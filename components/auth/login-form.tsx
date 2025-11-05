@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { Card, CardContent, CardFooter, CardHeader } from "../ui/card";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import { loginAction } from "@/lib/actions/auth.actions";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Checkbox } from "../ui/checkbox";
+import { toast } from "sonner";
 
 export function LoginForm() {
   const router = useRouter();
@@ -16,8 +17,28 @@ export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isPending, startTransition] = useTransition()
+  const searchParams = useSearchParams()
+  const callbackUrl = searchParams.get('callbackUrl') || '/'
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    startTransition(async () => {
+      const result = await loginAction({email, password, callbackUrl});
+      if (result.success) {
+        // await initAuthUser()
+        setError(result.message);
+        
+        router.replace(callbackUrl);
+      } else {
+        setError(result.message);
+        if (result.status.toString() === '403') {
+          const params = searchParams.toString()+ `&email=${email}`
+          router.replace(`/verify-otp?${params.startsWith('&') ? params.replace('&', ''): params}`);
+        }
+      }
+    });
+
     const result = await loginAction({ email, password });
     if (!result.success) setError(result.message);
     else {
@@ -80,14 +101,14 @@ export function LoginForm() {
                     Remember me
                   </Label>
                 </div>
-                <a
-                  href="#"
+                <Link
+                  href="/forgot-password"
                   className="text-sm font-medium text-primary hover:text-primary/80"
                 >
                   Forgot your password?
-                </a>
+                </Link>
               </div>
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full" disabled={isPending}>
                 Sign in
               </Button>
             </form>
@@ -103,7 +124,7 @@ export function LoginForm() {
                 </div>
               </div>
               <div className="mt-6 grid grid-cols-1 gap-3">
-                <Button variant="secondary" className="w-full">
+                <Button variant="secondary" className="w-full" onClick={()=> toast.warning('Coming soon....!', {position: 'top-center'})}>
                   Google
                 </Button>
               </div>

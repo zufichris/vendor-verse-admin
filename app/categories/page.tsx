@@ -68,5 +68,7 @@ async function CategoriesTableWrapper({
       </div>
     );
   }
+
+  
   return <CategoriesTable categories={result.data} />;
 }

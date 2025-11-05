@@ -4,6 +4,9 @@ import "./globals.css";
 import Link from "next/link";
 import { getLoggedInUser } from "@/lib/actions/auth.actions";
 import { LoginForm } from "@/components/auth/login-form";
+import { Toaster } from "@/components/ui/sonner";
+import { redirect } from "next/navigation";
+import Header from "@/components/layout/header";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -26,39 +29,18 @@ export default async function RootLayout({
     children: React.ReactNode;
 }>) {
     const result = await getLoggedInUser();
-    if (!result.success) {
-        return (
-            <html lang="en">
-                <body
-                    className={`${geistSans.variable} ${geistMono.variable} antialiased p-2 md:p-4 lg:p-8 bg-background text-foreground`}
-                >
-                    <main className="flex items-center justify-center h-screen">
-                        <LoginForm />
-                    </main>
-                </body>
-            </html>
-        );
-    }
+    // if (!result.success || !result.data) {
+    //     redirect('/auth/login')
+    // }
+
     return (
         <html lang="en">
             <body
                 className={`${geistSans.variable} ${geistMono.variable} antialiased p-2 md:p-4 lg:p-8 bg-background text-foreground`}
             >
+                <Toaster />
                 <header className="mb-4">
-                    <nav className="flex flex-col md:flex-row items-center justify-between">
-                        <div className="flex items-center justify-between">
-                            <Link href={"/"} className="text-5xl font-bold">
-                                LOGO
-                            </Link>
-                        </div>
-                        <div className="flex space-x-4">
-                            <Link href={"/products"}>Prodcts</Link>
-                            <Link href={"/categories"}>Categories</Link>
-                            <Link href={"/users"}>Users</Link>
-                            <Link href={"/orders"}>Orders</Link>
-                            <Link href={"/banners"}>Banners</Link>
-                        </div>
-                    </nav>
+                    <Header />
                 </header>
                 <main>{children}</main>
             </body>

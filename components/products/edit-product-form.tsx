@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Plus, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -18,6 +18,9 @@ import { updateProduct } from "@/lib/actions/product.actions"
 import z from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useEditor } from "@tiptap/react"
+import { getDefaultEditorConfig } from "@/lib/tiptap-utils"
+import { SimpleEditor } from "../tiptap-templates/simple/simple-editor"
 
 interface EditProductFormProps {
     product: Product
@@ -32,6 +35,19 @@ export function EditProductForm({ product, categories }: EditProductFormProps) {
     const [currentTag, setCurrentTag] = useState("")
     const router = useRouter()
     const { toast } = useToast()
+
+    const jsonDesc = useMemo(()=>{
+        let content = {}
+        try {
+            content = typeof product.description === 'string' ? JSON.parse(product.description) : product.description
+        } catch (e) {
+            console.log(`Json parse error`, e)
+        }
+
+        return content;
+    },[])
+
+    const editor = useEditor(getDefaultEditorConfig())
 
     const form = useForm<any>({
         resolver: zodResolver(UpdateProductDtoSchema),
@@ -71,33 +87,12 @@ export function EditProductForm({ product, categories }: EditProductFormProps) {
         form.setValue("tags", newTags)
     }
 
-    const handleImageUpload = (files: FileList | null) => {
-        if (files) {
-            const newFiles = Array.from(files)
-            setImageFiles((prev) => [...prev, ...newFiles])
-
-            // Convert to image objects for form
-            const imageObjects = newFiles.map((file) => ({
-                url: URL.createObjectURL(file),
-                altText: file.name,
-            }))
-
-            const currentImages = form.getValues("images") || product.images
-            form.setValue("images", [...currentImages, ...imageObjects])
-        }
-    }
-
-    const handleThumbnailUpload = (file: File) => {
-        setThumbnailFile(file)
-        form.setValue("thumbnail", {
-            url: URL.createObjectURL(file),
-            altText: file.name,
-        })
-    }
-
     const onSubmit = async (data: any) => {
         setIsSubmitting(true)
         try {
+            const desc = editor.getJSON()
+
+            data.description = JSON.stringify(desc)
             const result = await updateProduct(product.id, data)
 
             if (result.success) {
@@ -123,6 +118,13 @@ export function EditProductForm({ product, categories }: EditProductFormProps) {
             setIsSubmitting(false)
         }
     }
+
+
+    useEffect(()=>{
+        if (editor) {
+            editor.commands.setContent(jsonDesc)
+        }
+    }, [editor])
 
     return (
         <Form {...form}>
@@ -173,7 +175,8 @@ export function EditProductForm({ product, categories }: EditProductFormProps) {
                             <FormItem>
                                 <FormLabel>Description *</FormLabel>
                                 <FormControl>
-                                    <Textarea placeholder="Describe your product in detail..." className="min-h-[100px]" {...field} />
+                                    <SimpleEditor editor={editor} />
+                                    {/* <Textarea placeholder="Describe your product in detail..." className="min-h-[100px]" {...field} /> */}
                                 </FormControl>
                                 <FormDescription>Detailed description of the product for customers</FormDescription>
                                 <FormMessage />

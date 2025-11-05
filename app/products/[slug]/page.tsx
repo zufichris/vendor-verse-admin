@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Edit, Trash2, Copy, Link2 } from "lucide-react";
+import { ArrowLeft, Edit,  Link2, Plus } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -12,8 +12,11 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { getProduct, getProductBySlug } from "@/lib/actions/product.actions";
+import { getProductBySlug } from "@/lib/actions/product.actions";
 import { ProductDetailsSkeleton } from "@/components/products/product-details-skeleton";
+import ThumbnailUploader from "@/components/products/thumbnail-uploader";
+import EditProductImages from "@/components/products/edit-product-images";
+import ProductDescription from "@/components/products/product-description";
 
 interface ProductPageProps {
     params: Promise<{ slug: string }>;
@@ -38,7 +41,7 @@ export async function generateMetadata({ params }: ProductPageProps) {
     const product = result.data;
     return {
         title: product.name,
-        description: product.description || "Product details",
+        description: product.seo?.description || "Product details",
         openGraph: {
             title: product.name,
             description: product.description || "Product details",
@@ -52,7 +55,7 @@ export async function generateMetadata({ params }: ProductPageProps) {
         twitter: {
             card: "summary_large_image",
             title: product.name,
-            description: product.description || "Product details",
+            description: product.seo?.description || "Product details",
             images: [product.thumbnail.url || "/placeholder.svg"],
         },
     };
@@ -74,6 +77,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 </div>
 
                 <div className="flex items-center space-x-2">
+                    <Button variant="outline" asChild>
+                        <Link href={`/products/${slug}/variants/new`}>
+                            <Plus className="mr-2 h-4 w-4" />
+                            Add Variant
+                        </Link>
+                    </Button>
                     <Button variant="outline" asChild>
                         <Link href={`/products/${slug}/edit`}>
                             <Edit className="mr-2 h-4 w-4" />
@@ -100,6 +109,8 @@ async function ProductDetailsWrapper({ slug }: { slug: string }) {
         return <div className="text-red-500">{result.message}</div>;
     }
     const product = result.data;
+
+    const imagesToDisplay = product.images?.slice(0, 5);
 
     const getStatusBadge = (status: string) => {
         switch (status) {
@@ -146,7 +157,7 @@ async function ProductDetailsWrapper({ slug }: { slug: string }) {
                         </Badge>
                     )}
                 </div>
-                <p className="text-muted-foreground">{product.description}</p>
+                <p className="text-muted-foreground"><ProductDescription description={product.description} /></p>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -155,11 +166,14 @@ async function ProductDetailsWrapper({ slug }: { slug: string }) {
                     {/* Product Images */}
                     <Card>
                         <CardHeader>
-                            <CardTitle>Product Images</CardTitle>
+                            <div className="flex items-center justify-between">
+                                <CardTitle>Product Images</CardTitle>
+                                <EditProductImages product={product} />
+                            </div>
                         </CardHeader>
                         <CardContent>
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                <div className="relative aspect-square rounded-lg overflow-hidden border-2 border-primary">
+                                <div className="relative aspect-square rounded-lg overflow-hidden border-2 border-primary group">
                                     <Image
                                         src={product.thumbnail.url || "/placeholder.svg"}
                                         alt={product.thumbnail.altText || product.name}
@@ -171,8 +185,10 @@ async function ProductDetailsWrapper({ slug }: { slug: string }) {
                                             Thumbnail
                                         </Badge>
                                     </div>
+
+                                    <ThumbnailUploader className="absolute left-0 top-0 w-full h-full bg-muted-foreground opacity-90 flex items-center justify-center invisible group-hover:visible transition-all ease-in duration-100" productId={product.id} inStock={product.isInStock} />
                                 </div>
-                                {product.images.map((image, index) => (
+                                {imagesToDisplay.map((image, index) => (
                                     <div
                                         key={index}
                                         className="relative aspect-square rounded-lg overflow-hidden"
@@ -185,6 +201,13 @@ async function ProductDetailsWrapper({ slug }: { slug: string }) {
                                             fill
                                             className="object-cover"
                                         />
+                                        {
+                                            index === (imagesToDisplay.length - 1) && product.images.length > imagesToDisplay.length && (
+                                                <div className="absolute top-0 left-0 w-full h-full bg-accent-foreground opacity-40 hover:opacity-60 flex items-center justify-center text-primary-foreground font-bold text-xl">
+                                                    <Plus /> {product.images.length - imagesToDisplay.length} More
+                                                </div>
+                                            )
+                                        }
                                     </div>
                                 ))}
                             </div>

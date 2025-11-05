@@ -29,7 +29,7 @@ export async function getVariant(variantId: string) {
 
 export async function createVariant(data: CreateVariantDto) {
   const result = await Api.post<ProductVariant>(
-    `/products/${data.productId}/variants`,
+    `/products/admin/${data.productId}/variants`,
     data,
   );
   revalidatePath(`/admin/products/${data.productId}/variants`);

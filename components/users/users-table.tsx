@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { MoreHorizontal, Search, Filter, Eye, Edit, Trash2, UserCheck, UserX, Shield, Key } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -24,6 +24,7 @@ import { type User, UserStatus, UserRole } from "@/types/user.types"
 import type { PaginationResult } from "@/types/pagination.types"
 import { DeleteUserModal } from "./delete-user-modal"
 import { toggleUserStatus } from "@/lib/actions/user.actions"
+import { cn } from "@/lib/utils"
 
 interface UsersTableProps {
     result: PaginationResult<User>
@@ -49,6 +50,7 @@ const roleColors = {
 export function UsersTable({ result }: UsersTableProps) {
     const router = useRouter()
     const searchParams = useSearchParams()
+    const pathname = usePathname()
     const [search, setSearch] = useState(searchParams.get("search") || "")
     const [status, setStatus] = useState(searchParams.get("status") || "")
     const [role, setRole] = useState(searchParams.get("role") || "")
@@ -62,7 +64,7 @@ export function UsersTable({ result }: UsersTableProps) {
             params.delete("search")
         }
         params.delete("page")
-        router.push(`/admin/users?${params.toString()}`)
+        router.push(`${pathname}?${params.toString()}`)
     }
 
     const handleStatusFilter = (value: string) => {
@@ -73,7 +75,8 @@ export function UsersTable({ result }: UsersTableProps) {
             params.delete("status")
         }
         params.delete("page")
-        router.push(`/admin/users?${params.toString()}`)
+        setStatus(value)
+        router.push(`${pathname}?${params.toString()}`)
     }
 
     const handleRoleFilter = (value: string) => {
@@ -84,7 +87,8 @@ export function UsersTable({ result }: UsersTableProps) {
             params.delete("role")
         }
         params.delete("page")
-        router.push(`/admin/users?${params.toString()}`)
+        setRole(value)
+        router.push(`${pathname}?${params.toString()}`)
     }
 
     const handleToggleStatus = async (user: User) => {
@@ -202,10 +206,10 @@ export function UsersTable({ result }: UsersTableProps) {
                                             </div>
                                         </TableCell>
                                         <TableCell>
-                                            <Badge className={roleColors[user.role]}>{user.role}</Badge>
+                                            <Badge className={cn(roleColors[user.role], 'uppercase')}>{user.role}</Badge>
                                         </TableCell>
                                         <TableCell>
-                                            <Badge className={statusColors[user.status]}>{user.status.replace("_", " ")}</Badge>
+                                            <Badge className={cn(statusColors[user.status], 'uppercase')}>{user.status.replace("_", " ")}</Badge>
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex items-center space-x-2">
@@ -255,17 +259,17 @@ export function UsersTable({ result }: UsersTableProps) {
                                                 <DropdownMenuContent align="end">
                                                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                                     <DropdownMenuItem asChild>
-                                                        <Link href={`/admin/users/${user.id}`}>
+                                                        <Link href={`/users/${user.id}`}>
                                                             <Eye className="mr-2 h-4 w-4" />
                                                             View Details
                                                         </Link>
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuItem asChild>
+                                                    {/* <DropdownMenuItem asChild>
                                                         <Link href={`/admin/users/${user.id}/edit`}>
                                                             <Edit className="mr-2 h-4 w-4" />
                                                             Edit User
                                                         </Link>
-                                                    </DropdownMenuItem>
+                                                    </DropdownMenuItem> */}
                                                     <DropdownMenuSeparator />
                                                     <DropdownMenuItem onClick={() => handleToggleStatus(user)}>
                                                         {user.status === UserStatus.ACTIVE ? (
@@ -280,12 +284,12 @@ export function UsersTable({ result }: UsersTableProps) {
                                                             </>
                                                         )}
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuItem asChild>
+                                                    {/* <DropdownMenuItem asChild>
                                                         <Link href={`/admin/users/${user.id}/reset-password`}>
                                                             <Key className="mr-2 h-4 w-4" />
                                                             Reset Password
                                                         </Link>
-                                                    </DropdownMenuItem>
+                                                    </DropdownMenuItem> */}
                                                     <DropdownMenuSeparator />
                                                     <DropdownMenuItem className="text-red-600" onClick={() => setDeleteUser(user)}>
                                                         <Trash2 className="mr-2 h-4 w-4" />

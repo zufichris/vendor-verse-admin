@@ -54,3 +54,12 @@ export interface UserAnalytics {
   newUsersThisWeek: number
   newUsersThisMonth: number
 }
+
+export interface BannersAnalytics {
+  total: number;
+  totalFromLastMont: number;
+  active: number;
+  clickRate: number;
+  clickRateFromLastWeek: number;
+  impressions: number;
+}

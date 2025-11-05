@@ -5,7 +5,7 @@ import { CreateUserForm } from "@/components/users/create-user-form"
 
 export default function NewUserPage() {
   return (
-    <div className="flex-1 space-y-4  pt-6">
+    <div className="flex-1 space-y-4  pt-6 max-w-4xl mx-auto">
       <div className="flex items-center space-x-2">
         <Button variant="ghost" size="sm" asChild>
           <Link href="/admin/users">
