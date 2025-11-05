@@ -12,7 +12,7 @@ interface OrdersPageProps {
     searchParams: Promise<{
         page?: string;
         search?: string;
-        fulfillmentStatus?: string;
+        status?: string;
         paymentStatus?: string;
         paymentMethod?: string;
         dateFrom?: string;
@@ -28,7 +28,7 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
 
     const filters: OrderFilters = {
         search: params.search,
-        fulfillmentStatus: params.fulfillmentStatus as any,
+        status: params.status as any,
         paymentStatus: params.paymentStatus as any,
         paymentMethod: params.paymentMethod as any,
         dateFrom: params.dateFrom,
@@ -72,9 +72,9 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
                         <Package className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{analytics.totalOrders}</div>
+                        <div className="text-2xl font-bold">{analytics.totalOrders.total}</div>
                         <p className="text-xs text-muted-foreground">
-                            +{analytics.ordersToday} today
+                            +{analytics.totalOrders.today} today
                         </p>
                     </CardContent>
                 </Card>
@@ -86,10 +86,10 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">
-                            ${analytics.totalRevenue.toFixed(2)}
+                            ${analytics.totalRevenue.total.toFixed(2)}
                         </div>
                         <p className="text-xs text-muted-foreground">
-                            +{analytics.ordersThisWeek} this week
+                            +{analytics.totalRevenue.thisWeek.toFixed(2)} this week
                         </p>
                     </CardContent>
                 </Card>
@@ -103,10 +103,10 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">
-                            ${analytics.averageOrderValue.toFixed(2)}
+                            ${analytics.averageOrder.pastThreeMonths.toFixed(2)}
                         </div>
                         <p className="text-xs text-muted-foreground">
-                            +{analytics.ordersThisMonth} this month
+                            +{analytics.averageOrder.thisMonth.toFixed(2)} this month
                         </p>
                     </CardContent>
                 </Card>
@@ -119,9 +119,9 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
                         <Clock className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{analytics.pendingOrders}</div>
+                        <div className="text-2xl font-bold">{analytics.pendingOrders.total}</div>
                         <p className="text-xs text-muted-foreground">
-                            {analytics.processingOrders} processing
+                            {analytics.pendingOrders.processing} processing
                         </p>
                     </CardContent>
                 </Card>
@@ -135,7 +135,6 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
                 <CardContent>
                     <Suspense fallback={<OrdersTableSkeleton />}>
                         <OrdersTable
-                            orders={ordersResult.data}
                             pagination={ordersResult}
                             filters={filters}
                         />

@@ -1,5 +1,16 @@
+@import '../styles/_variables.scss';
+@import '../styles/_keyframe-animations.scss';
 @import "tailwindcss";
 @import "tw-animate-css";
+
+.simple-editor-wrapper{
+  width: unset!important;
+}
+
+.simple-editor-content{
+  max-width: unset!important;
+  margin: 0px unset!important;
+}
 
 :root {
     /* Base colors */

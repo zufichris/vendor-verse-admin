@@ -1,12 +1,10 @@
 import { Suspense } from "react"
-import { Plus } from "lucide-react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { BannersTable } from "@/components/banners/banners-table"
 import { BannersTableSkeleton } from "@/components/banners/banners-table-skeleton"
-import { getBanners } from "@/lib/actions/banner.actions"
+import { getBanners, getBannersAnalytics } from "@/lib/actions/banner.actions"
 import type { PaginationParams } from "@/types/pagination.types"
+import CreateBannerModal from "@/components/banners/create-banner-modal"
 
 interface BannersPageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
@@ -20,6 +18,8 @@ export default async function BannersPage({ searchParams }: BannersPageProps) {
     search: typeof params.search === "string" ? params.search : "",
   }
 
+  const bannersAnalytics = await getBannersAnalytics()
+
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
@@ -28,12 +28,7 @@ export default async function BannersPage({ searchParams }: BannersPageProps) {
           <p className="text-muted-foreground">Manage promotional banners and marketing content</p>
         </div>
         <div className="flex items-center space-x-2">
-          <Button asChild>
-            <Link href="/banners/new">
-              <Plus className="mr-2 h-4 w-4" />
-              Add Banner
-            </Link>
-          </Button>
+          <CreateBannerModal  />
         </div>
       </div>
 
@@ -43,8 +38,8 @@ export default async function BannersPage({ searchParams }: BannersPageProps) {
             <CardTitle className="text-sm font-medium">Total Banners</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-primary">12</div>
-            <p className="text-xs text-muted-foreground">+2 from last month</p>
+            <div className="text-2xl font-bold text-primary">{bannersAnalytics?.total || 0}</div>
+            <p className="text-xs text-muted-foreground">{(bannersAnalytics?.totalFromLastMont || 0) >= 0 ? '+' : '-'}{bannersAnalytics?.totalFromLastMont} from last month</p>
           </CardContent>
         </Card>
         <Card>
@@ -52,7 +47,7 @@ export default async function BannersPage({ searchParams }: BannersPageProps) {
             <CardTitle className="text-sm font-medium">Active Banners</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-success">8</div>
+            <div className="text-2xl font-bold text-success">{bannersAnalytics?.active || 0}</div>
             <p className="text-xs text-muted-foreground">Currently displayed</p>
           </CardContent>
         </Card>
@@ -61,8 +56,8 @@ export default async function BannersPage({ searchParams }: BannersPageProps) {
             <CardTitle className="text-sm font-medium">Click Rate</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-info">3.2%</div>
-            <p className="text-xs text-muted-foreground">+0.5% from last week</p>
+            <div className="text-2xl font-bold text-info">{bannersAnalytics?.clickRate || 0}%</div>
+            <p className="text-xs text-muted-foreground">{(bannersAnalytics?.clickRateFromLastWeek || 0) >= 0 ? '+' : '-'}{bannersAnalytics?.clickRateFromLastWeek}% from last week</p>
           </CardContent>
         </Card>
         <Card>
@@ -70,7 +65,7 @@ export default async function BannersPage({ searchParams }: BannersPageProps) {
             <CardTitle className="text-sm font-medium">Impressions</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-warning">45.2K</div>
+            <div className="text-2xl font-bold text-warning">{(bannersAnalytics?.impressions||0)/1000}K</div>
             <p className="text-xs text-muted-foreground">This month</p>
           </CardContent>
         </Card>

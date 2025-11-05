@@ -86,7 +86,7 @@ export function OrderDetailsActions({ order }: OrderDetailsActionsProps) {
             </DropdownMenuItem>
           )}
 
-          {order.payment.status === "paid" && (
+          {order.payment.status === "paid" && order.fulfillmentStatus !== 'delivered' && (
             <DropdownMenuItem onClick={handleRefund}>
               <DollarSign className="mr-2 h-4 w-4" />
               Refund Order

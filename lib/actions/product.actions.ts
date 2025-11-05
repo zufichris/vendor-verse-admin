@@ -46,13 +46,13 @@ export async function getProductCategories() {
 export async function createProduct(data: CreateProductDto) {
     const result = await Api.post<Product>("/products/admin", data);
 
-    if (result.success) revalidatePath("/admin/products");
+    if (result.success) revalidatePath("/products");
 
     return result;
 }
 
 export async function updateProduct(id: string, data: UpdateProductDto) {
-    const result = await Api.patch<Product>(`/products/${id}`, data);
+    const result = await Api.patch<Product>(`/products/admin/${id}`, data);
     if (result.success) {
         revalidatePath("/products");
         revalidatePath(`/products/${result.data.slug}`);

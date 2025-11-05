@@ -21,6 +21,7 @@ export const OrderItemSchema = z.object({
   quantity: z.number().int().min(1),
   discount: z.number().min(0).default(0),
   total: z.number().positive(),
+  imageUrl: z.string()
 })
 
 export const PaymentStatusSchema = z.enum(["pending", "paid", "failed", "refunded", "partially-refunded"])
@@ -45,10 +46,19 @@ export const FulfillmentStatusSchema = z.enum([
   "returned",
 ])
 
+const OrderUserSchema = z.object({
+  firstName: z.string(),
+  lastName: z.string().optional(),
+  email: z.string(),
+  phone: z.string().optional().nullable(),
+  id: z.string()
+})
+
 export const OrderSchema = z.object({
   id: z.string(),
   orderNumber: z.string(),
   userId: z.string(),
+  user: OrderUserSchema.optional().nullable(),
   items: z.array(OrderItemSchema).min(1),
   subTotal: z.number().positive(),
   tax: z.number().min(0),
@@ -75,23 +85,27 @@ export type FulfillmentStatus = z.infer<typeof FulfillmentStatusSchema>
 export type Order = z.infer<typeof OrderSchema>
 
 export interface OrderAnalytics {
-  totalOrders: number
-  totalRevenue: number
-  averageOrderValue: number
-  ordersToday: number
-  ordersThisWeek: number
-  ordersThisMonth: number
-  pendingOrders: number
-  processingOrders: number
-  shippedOrders: number
-  deliveredOrders: number
-  cancelledOrders: number
-  returnedOrders: number
+  totalOrders: {
+    today: number
+    total: number
+  },
+  totalRevenue: {
+    thisWeek: number,
+    total: number,
+  },
+  averageOrder: {
+    pastThreeMonths: number,
+    thisMonth: number,
+  },
+  pendingOrders: {
+    total: number,
+    processing: number,
+  }
 }
 
 export interface OrderFilters {
   search?: string
-  fulfillmentStatus?: FulfillmentStatus
+  status?: FulfillmentStatus
   paymentStatus?: PaymentStatus
   paymentMethod?: PaymentMethod
   dateFrom?: string

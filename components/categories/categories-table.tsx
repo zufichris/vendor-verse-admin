@@ -33,6 +33,7 @@ import {
   deleteCategory,
   updateCategory,
 } from "@/lib/actions/category.actions";
+import { toast } from "sonner";
 
 interface CategoriesTableProps {
   categories: PaginationResult<ProductCategory>;
@@ -51,7 +52,12 @@ export function CategoriesTable({ categories }: CategoriesTableProps) {
     return parent ? parent.name : "Unknown";
   };
   const handleCreateCategory = async (data: any) => {
-    await createCategory(data);
+    const res = await createCategory(data);
+
+    if (!res.success) {
+      toast.error(res?.message || 'Unexpected error')
+      return
+    }
     setCreateModalOpen(false);
   };
   const handleEditCategory = async (id: string, data: any) => {

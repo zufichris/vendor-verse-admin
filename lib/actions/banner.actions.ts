@@ -3,80 +3,58 @@
 import { revalidatePath } from "next/cache"
 import type { Banner } from "@/types/product.types"
 import type { PaginationResult, PaginationParams } from "@/types/pagination.types"
-
-// Mock data
-const mockBanners: Banner[] = [
-  {
-    id: "1",
-    slug: "summer-sale-2024",
-    title: "Summer Sale 2024",
-    subtitle: "Up to 70% Off",
-    description: "Don't miss our biggest summer sale with incredible discounts on all categories",
-    image: "/placeholder.svg?height=400&width=800&text=Summer+Sale",
-    cta: "Shop Now",
-    link: "/categories/summer-sale",
-    color: "#ff6b6b",
-  },
-  {
-    id: "2",
-    slug: "new-arrivals",
-    title: "New Arrivals",
-    subtitle: "Fresh Collection",
-    description: "Discover our latest products and trending items",
-    image: "/placeholder.svg?height=400&width=800&text=New+Arrivals",
-    cta: "Explore",
-    link: "/categories/new-arrivals",
-    color: "#4ecdc4",
-  },
-]
+import { Api } from "@/utils/api"
+import { BannersAnalytics, UserAnalytics } from "@/types/user.dto"
+import { BannerFormValues } from "../validations/banner.validations"
 
 export async function getBanners(params: PaginationParams = {}): Promise<PaginationResult<Banner>> {
+  const searchParams = new URLSearchParams()
   const { page = 1, limit = 10, search = "" } = params
 
-  await new Promise((resolve) => setTimeout(resolve, 800))
+  Object.entries({ page, limit, search }).map(([k, v]) => {
+    if (v.toString().trim()) {
+      searchParams.set(k, v.toString().trim())
+    }
+  })
 
-  let filteredBanners = [...mockBanners]
+  const res = await Api.get(`/products/banners?${searchParams.toString()}`);
 
-  if (search) {
-    filteredBanners = filteredBanners.filter(
-      (banner) =>
-        banner.title.toLowerCase().includes(search.toLowerCase()) ||
-        banner.subtitle.toLowerCase().includes(search.toLowerCase()),
-    )
-  }
+  return (res.data || {
+    data: [],
+    totalCount: 0,
+    filterCount: 0,
+    page: params.page || 1,
+    limit: params.limit || 10,
+    totalPages: 1,
+    hasNextPage: false,
+    hasPreviousPage: false
+  }) as unknown as PaginationResult<Banner>
+}
 
-  const totalCount = mockBanners.length
-  const filterCount = filteredBanners.length
-  const startIndex = (page - 1) * limit
-  const paginatedData = filteredBanners.slice(startIndex, startIndex + limit)
-  const totalPages = Math.ceil(filterCount / limit)
+export const getBannersAnalytics = async () => {
+  const res = await Api.get<BannersAnalytics>('/products/banners/analytics')
 
-  return {
-    data: paginatedData,
-    totalCount,
-    filterCount,
-    page,
-    limit,
-    totalPages,
-    hasNextPage: page < totalPages,
-    hasPreviousPage: page > 1,
-  }
+  return res.data
 }
 
 export async function getBanner(id: string): Promise<Banner | null> {
-  await new Promise((resolve) => setTimeout(resolve, 500))
-  return mockBanners.find((banner) => banner.id === id) || null
+  const res = await Api.get<Banner>(`/products/banners/${id}`)
+
+  return res.data;
 }
 
 export async function createBanner(
-  data: Omit<Banner, "id">,
+  data: BannerFormValues
 ): Promise<{ success: boolean; error?: string; bannerId?: string }> {
   try {
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    console.log("Creating banner:", data)
+    const res = await Api.post<Banner>('/products/admin/banners', data)
+
+    if (!res.success) {
+      throw res
+    }
 
     const newBannerId = `banner_${Date.now()}`
-    revalidatePath("/admin/banners")
+    revalidatePath("/banners")
 
     return { success: true, bannerId: newBannerId }
   } catch (error) {
@@ -85,13 +63,16 @@ export async function createBanner(
   }
 }
 
-export async function updateBanner(id: string, data: Partial<Banner>): Promise<{ success: boolean; error?: string }> {
+export async function updateBanner(id: string, data: BannerFormValues): Promise<{ success: boolean; error?: string }> {
   try {
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    console.log("Updating banner:", id, data)
+    const res = await Api.patch<Banner>(`/products/admin/banners/${id}`, data)
 
-    revalidatePath("/admin/banners")
-    revalidatePath(`/admin/banners/${id}`)
+    if (!res.success) {
+      throw res
+    }
+
+    revalidatePath("/banners")
+    revalidatePath(`/banners/${id}`)
 
     return { success: true }
   } catch (error) {

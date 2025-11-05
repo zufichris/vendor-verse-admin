@@ -29,6 +29,7 @@ import type { Banner } from "@/types/product.types";
 import type { PaginationResult } from "@/types/pagination.types";
 import { DeleteBannerModal } from "@/components/banners/delete-banner-modal";
 import { useToast } from "@/hooks/use-toast";
+import UpdateBannerModal from "./update-banner-modal";
 
 interface BannersTableProps {
     paginatedBanners: PaginationResult<Banner>;
@@ -157,10 +158,15 @@ export function BannersTable({ paginatedBanners }: BannersTableProps) {
                                                 </Link>
                                             </DropdownMenuItem>
                                             <DropdownMenuItem asChild>
-                                                <Link href={`/admin/banners/${banner.id}/edit`}>
-                                                    <Edit className="mr-2 h-4 w-4" />
-                                                    Edit Banner
-                                                </Link>
+                                                <UpdateBannerModal
+                                                    trigger={
+                                                        <div className="pl-2 flex items-center gap-3">
+                                                            <Edit size={15}/>
+                                                            Edit Banner
+                                                        </div>
+                                                    }
+                                                    banner={banner}
+                                                />
                                             </DropdownMenuItem>
                                             <DropdownMenuSeparator />
                                             <DropdownMenuItem

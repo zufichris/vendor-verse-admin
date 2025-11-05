@@ -76,7 +76,7 @@ export const CreateProductDtoSchema = z
       .describe("Keywords for better product discovery"),
     images: z
       .array(ImageSchema)
-      .min(1)
+      // .min(1) // No need images for product. Images would be required for variants
       .describe("Product images (at least one required)"),
     thumbnail: ImageSchema.describe("Main product image used in listings"),
     type: ProductTypeSchema.describe(

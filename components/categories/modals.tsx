@@ -43,10 +43,13 @@ import {
 } from "../ui/select";
 import { Button } from "../ui/button";
 import { ProductCategory } from "@/types/product.types";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Badge } from "../ui/badge";
 import { ImageUpload } from "../shared/image-upload";
+import { FileInput } from "../ui/file-input";
+import { uploadFile } from "@/lib/actions/files-manager";
+import { Spinner } from "../ui/spinner";
 
 interface CreateCategoryModalProps {
     open: boolean;
@@ -64,6 +67,9 @@ export function CreateCategoryModal({
     onSubmit,
     categories,
 }: CreateCategoryModalProps) {
+    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [selectedImage, setSelectedImage] = useState<File | null>(null)
+
     const form = useForm<CreateProductCategoryDto>({
         resolver: zodResolver(CreateProductCategoryDtoSchema),
         defaultValues: {
@@ -71,11 +77,31 @@ export function CreateCategoryModal({
             slug: "",
             description: "",
             parentId: undefined,
+
         },
     });
-    const handleSubmit = (data: CreateProductCategoryDto) => {
-        onSubmit(data);
-        form.reset();
+    const handleSubmit = async (data: CreateProductCategoryDto) => {
+        try {
+            setIsSubmitting(true)
+            if (selectedImage) {
+               const formData = new FormData()
+               formData.append('file', selectedImage, selectedImage.name)
+
+               const url = await uploadFile(formData) as unknown as string;
+
+               data.image = {
+                ...(data?.image ||{}),
+                url
+               }
+            }
+            await onSubmit(data);
+            form.reset();
+        } catch (error) {
+            console.log(error)
+        }finally{
+            setIsSubmitting(false)
+            setSelectedImage(null)
+        }
     };
     const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const name = e.target.value;
@@ -150,42 +176,86 @@ export function CreateCategoryModal({
                                 </FormItem>
                             )}
                         />
+                        <div>
+                            <FileInput
+                                accept="image/*"
+                                maxFiles={1}
+                                value={selectedImage ? [selectedImage] : []}
+                                onFilesChange={(files)=> setSelectedImage(files[0])}
+                            />
+                        </div>
                         <FormField
                             control={form.control}
-                            name="image"
+                            name="image.altText"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Category Image (optional)</FormLabel>
+                                    <FormLabel>Image Alt Text (optional)</FormLabel>
                                     <FormControl>
-                                        <ImageUpload
-                                            value={field.value?.url}
-                                            onChange={(url) =>
-                                                field.onChange({
-                                                    url,
-                                                    alt: field.value?.altText || "",
-                                                })
-                                            }
-                                            onAltChange={(alt) =>
-                                                field.onChange({
-                                                    url: field.value?.url || "",
-                                                    alt,
-                                                })
-                                            }
-                                        />
+                                        <div className="grid gap-2">
+                                          <Input
+                                            id="alt-text"
+                                            placeholder="Descriptive text for the image"
+                                            {...field}
+                                          />
+                                        </div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
+                        <div className="border-t pt-4 mt-2">
+                            <h3 className="text-sm font-medium mb-2">
+                                SEO Information (optional)
+                            </h3>
+                            <FormField
+                                control={form.control}
+                                name="seo.title"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>SEO Title</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                {...field}
+                                                placeholder="SEO title for this category"
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="seo.description"
+                                render={({ field }) => (
+                                    <FormItem className="mt-2">
+                                        <FormLabel>SEO Description</FormLabel>
+                                        <FormControl>
+                                            <Textarea
+                                                {...field}
+                                                placeholder="SEO description for this category"
+                                                className="resize-none"
+                                                rows={2}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
                         <DialogFooter>
                             <Button
                                 type="button"
                                 variant="outline"
                                 onClick={() => onOpenChange(false)}
+                                disabled={isSubmitting}
                             >
                                 Cancel
                             </Button>
-                            <Button type="submit">Create Category</Button>
+                            <Button type="submit" disabled={isSubmitting} onClick={()=> handleSubmit(form.getValues())}>
+                                {
+                                    isSubmitting ? <><Spinner /> Processing</> : 'Create Category'
+                                }
+                            </Button>
                         </DialogFooter>
                     </form>
                 </Form>
@@ -259,6 +329,9 @@ export function EditCategoryModal({
     onSubmit,
     categories,
 }: EditCategoryModalProps) {
+    const [selectedImage, setSelectedImage] = useState<File | null>(null)
+    const [isSubmitting, setIsSubmitting] = useState(false)
+
     const form = useForm<UpdateProductCategoryDto>({
         resolver: zodResolver(UpdateProductCategoryDtoSchema),
         defaultValues: {
@@ -285,9 +358,32 @@ export function EditCategoryModal({
             });
         }
     }, [category, form]);
-    const handleSubmit = (data: UpdateProductCategoryDto) => {
+
+    console.log(category)
+
+    const handleSubmit = async (data: UpdateProductCategoryDto) => {
         if (category) {
-            onSubmit(category.id, data);
+            try {
+                setIsSubmitting(true)
+                if (selectedImage) {
+                    const formData = new FormData()
+                    formData.append('file', selectedImage, selectedImage.name)
+
+                    const url = await uploadFile(formData) as unknown as string;
+
+                    data.image = {
+                        ...(data?.image || {}),
+                        url
+                    }
+                }
+
+                await onSubmit(category.id, data);
+            } catch (error) {
+                console.log(error)
+            }finally{
+                setIsSubmitting(false)
+                setSelectedImage(null)
+            }
         }
     };
     if (!category) return null;
@@ -358,21 +454,15 @@ export function EditCategoryModal({
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Category Image (optional)</FormLabel>
+                                        {
+                                            !selectedImage && category.image?.url && <div><img src={category.image.url} alt={category.image?.altText || category.name}  /></div>
+                                        }
                                     <FormControl>
-                                        <ImageUpload
-                                            value={field.value?.url}
-                                            onChange={(url) =>
-                                                field.onChange({
-                                                    url,
-                                                    alt: field.value?.altText || "",
-                                                })
-                                            }
-                                            onAltChange={(alt) =>
-                                                field.onChange({
-                                                    url: field.value?.url || "",
-                                                    alt,
-                                                })
-                                            }
+                                        <FileInput
+                                            value={selectedImage ? [selectedImage] : []}
+                                            onFilesChange={(files)=> setSelectedImage(files[0])}
+                                            accept="image/*"
+                                            maxFiles={1}
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -423,10 +513,15 @@ export function EditCategoryModal({
                                 type="button"
                                 variant="outline"
                                 onClick={() => onOpenChange(false)}
+                                disabled={isSubmitting}
                             >
                                 Cancel
                             </Button>
-                            <Button type="submit">Save Changes</Button>
+                            <Button type="submit" disabled={isSubmitting}>
+                                {
+                                    isSubmitting ? <><Spinner /> Updating</> : "Save Changes"
+                                }
+                            </Button>
                         </DialogFooter>
                     </form>
                 </Form>

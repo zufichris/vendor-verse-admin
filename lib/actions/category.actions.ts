@@ -34,7 +34,7 @@ export async function deleteCategory(id: string) {
 
 export async function createCategory(
     data: CreateProductCategoryDto,
-): Promise<{ success: boolean; error?: string; categoryId?: string }> {
+) {
     const result = await Api.post<ProductCategory>(
         `/products/admin/categories`,
         data,

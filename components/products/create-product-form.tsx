@@ -27,13 +27,18 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/hooks/use-toast";
 import {
     type CreateProductDto,
     CreateProductDtoSchema,
 } from "@/types/product.dto";
 import type { ProductCategory } from "@/types/product.types";
 import { createProduct } from "@/lib/actions/product.actions";
+import { FileInput } from "../ui/file-input";
+import { uploadFile } from "@/lib/actions/files-manager";
+import { toast } from "sonner";
+import { SimpleEditor } from "../tiptap-templates/simple/simple-editor";
+import { getDefaultEditorConfig } from "@/lib/tiptap-utils";
+import { useEditor } from "@tiptap/react";
 
 interface CreateProductFormProps {
     categories: ProductCategory[];
@@ -52,15 +57,16 @@ export function CreateProductForm({ categories }: CreateProductFormProps) {
     const imagesInputRef = useRef<HTMLInputElement>(null);
 
     const router = useRouter();
-    const { toast } = useToast();
+
+    const editor = useEditor(getDefaultEditorConfig())
 
     const form = useForm<CreateProductDto>({
         resolver: zodResolver(CreateProductDtoSchema),
         defaultValues: {
             name: "",
-            description: "",
+            description: " ",
             price: 0,
-            currency: "USD",
+            currency: "AED",
             categoryId: "",
             brand: "",
             tags: [],
@@ -91,169 +97,85 @@ export function CreateProductForm({ categories }: CreateProductFormProps) {
         form.setValue("tags", newTags);
     };
 
-    // Validate file type and size
-    const validateFile = (file: File): string | null => {
-        const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-        const maxSize = 5 * 1024 * 1024; // 5MB
-
-        if (!validTypes.includes(file.type)) {
-            return 'Please select a valid image file (JPEG, PNG, GIF, or WebP)';
-        }
-
-        if (file.size > maxSize) {
-            return 'File size must be less than 5MB';
-        }
-
-        return null;
-    };
-
-    const handleImageUpload = (files: FileList | null) => {
-        if (!files || files.length === 0) return;
-
-        const validFiles: File[] = [];
-        const errors: string[] = [];
-
-        Array.from(files).forEach(file => {
-            const error = validateFile(file);
-            if (error) {
-                errors.push(`${file.name}: ${error}`);
-            } else {
-                validFiles.push(file);
-            }
-        });
-
-        if (errors.length > 0) {
-            toast({
-                title: "Upload Error",
-                description: errors.join('\n'),
-                variant: "destructive",
-            });
-        }
-
-        if (validFiles.length > 0) {
-            const newFiles = [...imageFiles, ...validFiles];
-            setImageFiles(newFiles);
-
-            const imageObjects = newFiles.map((file) => ({
-                url: URL.createObjectURL(file),
-                altText: file.name.replace(/\.[^/.]+$/, ""), // Remove file extension
-            }));
-
-            form.setValue("images", imageObjects);
-        }
-
-        // Reset the input
-        if (imagesInputRef.current) {
-            imagesInputRef.current.value = '';
-        }
-    };
-
-    const handleThumbnailUpload = (file: File) => {
-        const error = validateFile(file);
-        if (error) {
-            toast({
-                title: "Upload Error",
-                description: error,
-                variant: "destructive",
-            });
-            return;
-        }
-
-        setThumbnailFile(file);
-        form.setValue("thumbnail", {
-            url: URL.createObjectURL(file),
-            altText: file.name.replace(/\.[^/.]+$/, ""), // Remove file extension
-        });
-
-        // Reset the input
-        if (thumbnailInputRef.current) {
-            thumbnailInputRef.current.value = '';
-        }
-    };
-
-    const removeThumbnail = () => {
-        if (thumbnailFile) {
-            URL.revokeObjectURL(form.getValues("thumbnail").url);
-        }
-        setThumbnailFile(null);
-        form.setValue("thumbnail", { url: "", altText: "" });
-        if (thumbnailInputRef.current) {
-            thumbnailInputRef.current.value = '';
-        }
-    };
-
-    const removeImage = (index: number) => {
-        const currentImages = form.getValues("images");
-        if (currentImages[index]?.url) {
-            URL.revokeObjectURL(currentImages[index].url);
-        }
-
-        const newFiles = imageFiles.filter((_, i) => i !== index);
-        setImageFiles(newFiles);
-
-        const imageObjects = newFiles.map((file) => ({
-            url: URL.createObjectURL(file),
-            altText: file.name.replace(/\.[^/.]+$/, ""),
-        }));
-
-        form.setValue("images", imageObjects);
-    };
-
     const onSubmit = async (data: CreateProductDto) => {
         if (!thumbnailFile) {
-            toast({
-                title: "Validation Error",
-                description: "Please upload a thumbnail image",
-                variant: "destructive",
+            toast.error("Validation Error", {
+                description: "Please upload a thumbnail image"
             });
             return;
         }
 
         if (imageFiles.length === 0) {
-            toast({
-                title: "Validation Error",
-                description: "Please upload at least one product image",
-                variant: "destructive",
+            toast.error("Validation Error", {
+                description: "Please upload at least one product image"
             });
             return;
         }
+
+        const desc = JSON.stringify(editor.getJSON())
+
+        if (!desc.trim()) {
+            toast.error("Please add a product description!")
+            return;
+        }
+
+        data.description = desc; 
 
         setIsSubmitting(true);
         setError("");
 
         try {
-            const result = await createProduct(data);
+            const abortController = new AbortController()
+
+            // Upload images first
+            const thumbnailFormData = new FormData();
+            thumbnailFormData.append('file', thumbnailFile, thumbnailFile.name);
+
+            const imagesFormData = new FormData()
+
+            imageFiles.map(file =>{
+                imagesFormData.append('file', file, file.name);
+            })
+
+            const uploadedThumbnail = await uploadFile(thumbnailFormData, abortController.signal) as unknown as string;
+            if (!uploadedThumbnail) {
+                toast.error("Failed to upload thumbnail...")
+                return
+            }
+
+            const imagesUploaded = await uploadFile(imagesFormData, abortController.signal, true) as unknown as string[]
+
+            if (!imagesUploaded.length) {
+                toast.error('Failed to upload images...')
+                return
+            }
+
+
+            const result = await createProduct({
+                ...data,
+                thumbnail: {
+                    url: uploadedThumbnail
+                },
+                images: imagesUploaded.map(itm => ({url: itm}))
+            });
 
             if (result.success) {
-                toast({
-                    title: "Product Created",
+                toast.error("Product Created", {
                     description: "Your product has been created successfully.",
                 });
-
-                imageFiles.forEach(file => {
-                    const url = URL.createObjectURL(file);
-                    URL.revokeObjectURL(url);
-                });
-                if (thumbnailFile) {
-                    URL.revokeObjectURL(URL.createObjectURL(thumbnailFile));
-                }
 
                 router.push(`/products/${result.data.slug}`);
             } else {
                 setError(result.message);
-                toast({
-                    title: "Error",
+                toast("Error",{
                     description: result.message || "Failed to create product",
-                    variant: "destructive",
                 });
             }
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
             setError(errorMessage);
-            toast({
-                title: "Error",
+            toast.error("Error", {
                 description: errorMessage,
-                variant: "destructive",
             });
         } finally {
             setIsSubmitting(false);
@@ -318,11 +240,12 @@ export function CreateProductForm({ categories }: CreateProductFormProps) {
                             <FormItem>
                                 <FormLabel>Description *</FormLabel>
                                 <FormControl>
-                                    <Textarea
+                                    <SimpleEditor editor={editor} />
+                                    {/* <Textarea
                                         placeholder="Describe your product in detail..."
                                         className="min-h-[100px]"
                                         {...field}
-                                    />
+                                    /> */}
                                 </FormControl>
                                 <FormDescription>
                                     Detailed description of the product for customers
@@ -471,14 +394,11 @@ export function CreateProductForm({ categories }: CreateProductFormProps) {
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value="USD">USD</SelectItem>
-                                            <SelectItem value="EUR">EUR</SelectItem>
-                                            <SelectItem value="GBP">GBP</SelectItem>
-                                            <SelectItem value="CAD">CAD</SelectItem>
+                                            <SelectItem value="AED">AED</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <FormDescription>
-                                        Three-letter currency code (e.g., USD, EUR)
+                                        Three-letter currency code (e.g., USD, AED)
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
@@ -529,107 +449,22 @@ export function CreateProductForm({ categories }: CreateProductFormProps) {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-4">
                             <FormLabel>Thumbnail Image *</FormLabel>
-                            <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
-                                {thumbnailFile ? (
-                                    <div className="space-y-2">
-                                        <img
-                                            src={URL.createObjectURL(thumbnailFile)}
-                                            alt="Thumbnail preview"
-                                            className="mx-auto h-32 w-32 object-cover rounded-lg"
-                                        />
-                                        <p className="text-sm text-muted-foreground">
-                                            {thumbnailFile.name}
-                                        </p>
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={removeThumbnail}
-                                        >
-                                            Remove
-                                        </Button>
-                                    </div>
-                                ) : (
-                                    <div className="space-y-2">
-                                        <Upload className="mx-auto h-8 w-8 text-muted-foreground" />
-                                        <div>
-                                            <Button type="button" variant="outline" asChild>
-                                                <label
-                                                    htmlFor="thumbnail-upload"
-                                                    className="cursor-pointer"
-                                                >
-                                                    Upload Thumbnail
-                                                </label>
-                                            </Button>
-                                            <input
-                                                ref={thumbnailInputRef}
-                                                id="thumbnail-upload"
-                                                type="file"
-                                                accept="image/jpeg,image/png,image/gif,image/webp"
-                                                className="hidden"
-                                                onChange={(e) => {
-                                                    const file = e.target.files?.[0];
-                                                    if (file) handleThumbnailUpload(file);
-                                                }}
-                                            />
-                                        </div>
-                                        <p className="text-xs text-muted-foreground">
-                                            Main product image used in listings
-                                        </p>
-                                    </div>
-                                )}
-                            </div>
+                            <FileInput
+                                accept="image/*"
+                                maxFiles={1}
+                                value={thumbnailFile ? [thumbnailFile] : []}
+                                onFilesChange={(files)=> setThumbnailFile(files[0])}
+                            />
                         </div>
 
                         <div className="space-y-4">
                             <FormLabel>Additional Images *</FormLabel>
-                            <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
-                                <div className="space-y-2">
-                                    <Upload className="mx-auto h-8 w-8 text-muted-foreground" />
-                                    <div>
-                                        <Button type="button" variant="outline" asChild>
-                                            <label htmlFor="images-upload" className="cursor-pointer">
-                                                Upload Images
-                                            </label>
-                                        </Button>
-                                        <input
-                                            ref={imagesInputRef}
-                                            id="images-upload"
-                                            type="file"
-                                            accept="image/jpeg,image/png,image/gif,image/webp"
-                                            multiple
-                                            className="hidden"
-                                            onChange={(e) => handleImageUpload(e.target.files)}
-                                        />
-                                    </div>
-                                    <p className="text-xs text-muted-foreground">
-                                        Product images (at least one required)
-                                    </p>
-                                </div>
-                            </div>
-
-                            {imageFiles.length > 0 && (
-                                <div className="grid grid-cols-3 gap-2">
-                                    {imageFiles.map((file, index) => (
-                                        <div key={`${file.name}-${index}`} className="relative">
-                                            <img
-                                                src={URL.createObjectURL(file)}
-                                                alt={`Product image ${index + 1}`}
-                                                className="h-20 w-20 object-cover rounded-lg"
-                                            />
-                                            <Button
-                                                type="button"
-                                                variant="destructive"
-                                                size="sm"
-                                                className="absolute -top-2 -right-2 h-6 w-6 p-0"
-                                                onClick={() => removeImage(index)}
-                                            >
-                                                <X className="h-3 w-3" />
-                                            </Button>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
+                            <FileInput
+                                accept="image/*"
+                                maxFiles={30}
+                                value={imageFiles}
+                                onFilesChange={setImageFiles}
+                            />
                         </div>
                     </div>
                 </div>
@@ -826,7 +661,7 @@ export function CreateProductForm({ categories }: CreateProductFormProps) {
                     >
                         Cancel
                     </Button>
-                    <Button type="submit" disabled={isSubmitting}>
+                    <Button type="submit" disabled={isSubmitting} onClick={()=> onSubmit(form.getValues())}>
                         {isSubmitting ? "Creating..." : "Create Product"}
                     </Button>
                 </div>
