@@ -32,7 +32,7 @@ const commonColors:Record<string, string> = {
   chocolate: "#7B3F00",
   espresso: "#4B3621",
   sand: "#C2B280",
-  beige: "#F5F5DC",
+  beige: "#EEDEDF",
   olive: "#808000",
   navy: "#000080",
   gray: "#808080",

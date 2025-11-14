@@ -11,6 +11,7 @@ export const bannerSchema = z.object({
     description: z.string().optional(),
     cta: z.string().optional(),
     image: z.string().optional(),
+    video: z.string().optional(),
     color: z.string().optional(),
     link: z.string().optional(),
 })

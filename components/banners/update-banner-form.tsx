@@ -33,6 +33,7 @@ export function UpdateBannerForm({ initialData, onSubmit, onCancel }: UpdateBann
       image: initialData.image ?? "",
       color: initialData.color ?? "",
       link: initialData.link ?? "",
+      video: initialData?.video || ""
     },
   })
 
@@ -45,12 +46,18 @@ export function UpdateBannerForm({ initialData, onSubmit, onCancel }: UpdateBann
         formData.append('file', selectedBanner, selectedBanner.name)
  
         const url = await uploadFile(formData) as unknown as string;
-        data.image = url;
+        if (selectedBanner.type.startsWith('image/')) {
+          data.image = url;
+          data.video = ''
+        }else{
+          data.image = ''
+          data.video = url
+        }
        }
 
       await onSubmit({
         ...data,
-        link: data.link?.startsWith('/shop') ? data.link : `/shop?search=${data.link}`
+        link: data.link?.startsWith('/shop') ? data.link : `/shop`
       })
     } catch (error) {
       console.error("[v0] Form submission error:", error)
@@ -156,10 +163,13 @@ export function UpdateBannerForm({ initialData, onSubmit, onCancel }: UpdateBann
         {
             form.getValues('image') && !selectedBanner && <Image src={form.getValues('image')!} alt={form.getValues('title')} width={100} height={100} />
         }
+        {
+            form.getValues('video') && !selectedBanner && <video controls src={form.getValues('video')!} width={100} height={100} />
+        }
 
         <FileInput
             maxFiles={1}
-            accept="image/*"
+            accept="image/*, video/*"
             onFilesChange={(files) => setSelectedBanner(files[0])}
             value={selectedBanner ? [selectedBanner] : []}
         />

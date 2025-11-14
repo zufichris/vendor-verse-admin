@@ -18,8 +18,12 @@ interface Props{
 export default function CreateBannerModal({trigger, defaultOpen, onClickOutside}:Props) {
     const [open, setOpen] = useState(defaultOpen || false)
     const onSubmit = async(data: BannerFormValues)=>{
-        await createBanner(data)
-        setOpen(false)
+        const res = await createBanner(data)
+        if (res.success) {
+            
+            setOpen(false)
+        }
+        console.log(res)
     }
 
   return (

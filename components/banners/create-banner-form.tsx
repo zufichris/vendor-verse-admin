@@ -31,7 +31,8 @@ export function CreateBannerForm({ onSubmit }: CreateBannerFormProps) {
       cta: "",
       image: "",
       color: "",
-      link: ""
+      link: "",
+      video: ""
     },
   })
 
@@ -48,10 +49,17 @@ export function CreateBannerForm({ onSubmit }: CreateBannerFormProps) {
 
        const url = await uploadFile(formData) as unknown as string;
 
+       if (selectedBanner.type.startsWith('image/')) {
+        data.image = url;
+        data.video = ""
+       }else{
+        data.image = "";
+        data.video = url
+       }
+
       await onSubmit({
         ...data,
-        image: url,
-        link: data.link?.startsWith('/shop') ? data.link : `/shop?search=${data.link}`
+        link: data.link?.startsWith('/shop') ? data.link : `/shop`
       })
       form.reset()
     } catch (error) {
@@ -176,7 +184,7 @@ export function CreateBannerForm({ onSubmit }: CreateBannerFormProps) {
 
         <FileInput
             maxFiles={1}
-            accept="image/*"
+            accept="image/*, video/*"
             onFilesChange={(files)=>setSelectedBanner(files[0])}
             value={selectedBanner ? [selectedBanner]: []}
         />
