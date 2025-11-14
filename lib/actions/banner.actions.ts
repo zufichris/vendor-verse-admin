@@ -83,12 +83,12 @@ export async function updateBanner(id: string, data: BannerFormValues): Promise<
 
 export async function deleteBanner(id: string): Promise<{ success: boolean; error?: string }> {
   try {
-    await new Promise((resolve) => setTimeout(resolve, 500))
-    console.log("Deleting banner:", id)
+    const res = await Api.delete(`/products/admin/banners/${id}`)
 
     revalidatePath("/admin/banners")
+    revalidatePath(`/admin/banners/${id}`)
 
-    return { success: true }
+    return res
   } catch (error) {
     console.error("Error deleting banner:", error)
     return { success: false, error: "Failed to delete banner" }
