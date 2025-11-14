@@ -15,7 +15,7 @@ interface Props{
 }
 
 export default function OrderDetails({order}:Props) {
-  const formatCurrency = (amount: number, currency = "USD") => {
+  const formatCurrency = (amount: number, currency = "AED") => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency,
@@ -92,6 +92,9 @@ export default function OrderDetails({order}:Props) {
                       <p className="text-sm text-muted-foreground">
                         {formatCurrency(item.price)} × {item.quantity}
                       </p>
+                      <p className="text-sm text-muted-foreground">
+                        <span className="font-medium">Size:</span> { item.metaData?.size }
+                      </p>
                     </div>
                     <div className="text-right">
                       <p className="font-medium">{formatCurrency(item.total)}</p>
@@ -99,6 +102,7 @@ export default function OrderDetails({order}:Props) {
                         <p className="text-sm text-green-600">-{formatCurrency(item.discount)} discount</p>
                       )}
                     </div>
+                    
                   </div>
                 ))}
               </div>

@@ -1,3 +1,4 @@
+import { SupportedSizes } from "@/lib/validations/product.validations"
 import { z } from "zod"
 
 export const AddressSchema = z.object({
@@ -12,6 +13,11 @@ export const AddressSchema = z.object({
   country: z.string().min(1),
 })
 
+export const OrderItemMetaData = z.object({
+  size: z.enum(SupportedSizes)
+}).catchall(z.string())
+export type OrderItemMetaData = z.infer<typeof OrderItemMetaData>
+
 export const OrderItemSchema = z.object({
   productId: z.string(),
   variantId: z.string().optional(),
@@ -21,7 +27,8 @@ export const OrderItemSchema = z.object({
   quantity: z.number().int().min(1),
   discount: z.number().min(0).default(0),
   total: z.number().positive(),
-  imageUrl: z.string()
+  imageUrl: z.string(),
+  metaData: OrderItemMetaData
 })
 
 export const PaymentStatusSchema = z.enum(["pending", "paid", "failed", "refunded", "partially-refunded"])
